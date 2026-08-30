@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<!--
+=============================================================================
+  AFRICA ATMOSPHERIC CASCADE INITIATIVE
+  Government & Policy Intelligence Platform — v3.0
+  © 2026 Foster + Navi / Planetary Restoration Archive
+  License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+  Repository: github.com/therickyfoster/africa-atmospheric-cascade
+=============================================================================
+
+  ZERO-HARM DECLARATION
+  ─────────────────────
+  This platform is designed exclusively for educational, ecological, and
+  policy research purposes. All content supports atmospheric regeneration,
+  biodiversity restoration, and climate resilience. No content may be
+  repurposed for surveillance, coercive policy enforcement, resource
+  extraction without community consent, or ecological harm.
+
+  ANTI-INVERSION NOTICE
+  ─────────────────────
+  This tool must not be inverted to justify deforestation, land seizure,
+  greenwashing, or the displacement of indigenous communities under the
+  guise of restoration. Legitimate use preserves sovereignty and community
+  agency. Any application that harms the ecosystems it purports to restore
+  violates the intent of this platform entirely.
+
+  PRIVACY & ANALYTICS
+  ───────────────────
+  All storage is local-only (IndexedDB). No telemetry. No auto-send.
+  No third-party analytics. User data is inspectable and resettable at any
+  time via the Settings panel. No secrets, tokens, or emails are embedded.
+
+  TO EXTEND: Each JS section is labelled. Add new sections by following
+  the pattern in SECTION_DATA and adding a matching <section> element.
+=============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A PhD-level atmospheric cascade intelligence platform for African governments, policymakers, and international partners. Covering ecosystem regeneration, hydrological restoration, and continental climate policy.">
+<meta name="theme-color" content="#0b1f16">
+<title>Africa Atmospheric Cascade Initiative — Policy Intelligence Platform</title>
+
+<style>
+/* =============================================================================
+   DESIGN SYSTEM
+   Variables, resets, and base tokens. To adjust the colour palette, change
+   the CSS custom properties here — every other rule inherits from these.
+============================================================================= */
+:root {
+  --ink:       #0b1f16;
+  --ink-mid:   #1e3a2f;
+  --ink-soft:  #2e5440;
+  --leaf:      #3a7d55;
+  --canopy:    #4fa36b;
+  --mist:      #8fc9a3;
+  --gold:      #c9a227;
+  --gold-lt:   #e8c84a;
+  --cream:     #f5f0e8;
+  --cream-dk:  #ede7d9;
+  --sand:      #d9cdb8;
+  --white:     #ffffff;
+  --danger:    #c0392b;
+  --info:      #2980b9;
+  --radius:    6px;
+  --shadow:    0 4px 24px rgba(0,0,0,0.13);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.09);
+  --font-body: Georgia, "Times New Roman", Times, serif;
+  --font-ui:   "Trebuchet MS", Verdana, Geneva, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
+  --trans:     0.3s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--ink);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute; top: -40px; left: 8px;
+  background: var(--gold); color: var(--ink);
+  padding: 8px 14px; border-radius: var(--radius);
+  font-family: var(--font-ui); font-size: 0.85rem; font-weight: bold;
+  z-index: 9999; transition: top 0.2s;
+}
+.skip-link:focus { top: 8px; }
+
+/* =============================================================================
+   SPLASH SCREEN
+   Animated splash that fades after load. IndexedDB checks if user has seen
+   it before and skips after first visit.
+============================================================================= */
+#splash {
+  position: fixed; inset: 0; z-index: 10000;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 24px;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+#splash-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0.35;
+}
+
+.splash-inner {
+  position: relative; z-index: 2;
+  text-align: center; padding: 40px;
+  max-width: 680px;
+}
+.splash-logo {
+  width: 64px; height: 64px; margin: 0 auto 20px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+.splash-logo svg { width: 34px; height: 34px; fill: var(--gold); }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(201,162,39,0.4); }
+  50%      { box-shadow: 0 0 0 18px rgba(201,162,39,0); }
+}
+.splash-title {
+  font-family: var(--font-body);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  color: var(--white); font-weight: normal;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+.splash-sub {
+  font-family: var(--font-ui);
+  font-size: 0.9rem; color: var(--mist);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.splash-progress {
+  width: 240px; height: 3px; background: rgba(255,255,255,0.15);
+  border-radius: 2px; overflow: hidden; margin: 0 auto;
+}
+.splash-bar {
+  height: 100%; width: 0; background: var(--gold);
+  border-radius: 2px;
+  animation: loadBar 1.8s ease forwards;
+}
+@keyframes loadBar { to { width: 100%; } }
+.splash-version {
+  margin-top: 20px; font-family: var(--font-mono);
+  font-size: 0.72rem; color: rgba(255,255,255,0.3);
+}
+
+/* =============================================================================
+   STICKY NAVIGATION
+   Hides on scroll-down, reappears on scroll-up. Highlights current section.
+============================================================================= */
+#topnav {
+  position: sticky; top: 0; z-index: 900;
+  background: rgba(11,31,22,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201,162,39,0.2);
+  transition: transform 0.3s ease;
+}
+#topnav.hidden { transform: translateY(-100%); }
+
+.nav-inner {
+  max-width: 1340px; margin: 0 auto;
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 4px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+
+.nav-logo {
+  font-family: var(--font-ui); font-size: 0.78rem;
+  color: var(--gold); white-space: nowrap;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 16px 16px 16px 0;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  margin-right: 6px; flex-shrink: 0;
+}
+
+.nav-link {
+  font-family: var(--font-ui); font-size: 0.76rem;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none; white-space: nowrap;
+  padding: 16px 10px;
+  border-bottom: 2px solid transparent;
+  transition: color var(--trans), border-color var(--trans);
+  letter-spacing: 0.04em;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--gold-lt); border-bottom-color: var(--gold);
+}
+
+.nav-right {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0; padding-left: 12px;
+}
+.nav-btn {
+  background: none; border: 1px solid rgba(201,162,39,0.4);
+  color: var(--gold); font-family: var(--font-ui);
+  font-size: 0.72rem; padding: 6px 12px;
+  border-radius: var(--radius); cursor: pointer;
+  letter-spacing: 0.06em; transition: background var(--trans);
+}
+.nav-btn:hover { background: rgba(201,162,39,0.15); }
+
+/* Search bar in nav */
+#nav-search {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+  color: var(--white); font-family: var(--font-ui); font-size: 0.78rem;
+  padding: 6px 12px; border-radius: var(--radius);
+  width: 180px; transition: width var(--trans), border-color var(--trans);
+}
+#nav-search:focus {
+  outline: none; width: 240px;
+  border-color: var(--gold);
+}
+#nav-search::placeholder { color: rgba(255,255,255,0.35); }
+
+/* Search results dropdown */
+#search-results {
+  position: absolute; top: calc(100% + 4px); right: 20px;
+  background: var(--ink-mid); border: 1px solid rgba(201,162,39,0.3);
+  border-radius: var(--radius); min-width: 320px; max-width: 440px;
+  max-height: 400px; overflow-y: auto;
+  z-index: 1000; box-shadow: var(--shadow);
+  display: none;
+}
+#search-results.open { display: block; }
+.search-result-item {
+  padding: 12px 16px; cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background var(--trans);
+}
+.search-result-item:hover { background: rgba(201,162,39,0.1); }
+.sr-section {
+  font-family: var(--font-ui); font-size: 0.68rem;
+  color: var(--gold); text-transform: uppercase;
+  letter-spacing: 0.1em; margin-bottom: 4px;
+}
+.sr-text { font-size: 0.82rem; color: rgba(255,255,255,0.8); line-height: 1.4; }
+.sr-highlight { color: var(--gold-lt); font-weight: bold; }
+.no-results { padding: 16px; font-family: var(--font-ui); font-size: 0.82rem; color: var(--mist); }
+
+/* =============================================================================
+   HERO SECTION — Parallax
+   The parallax effect is driven by the parallaxEl JS below. Layers move at
+   different speeds on scroll to create depth.
+============================================================================= */
+#hero {
+  position: relative; overflow: hidden;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ink);
+}
+.hero-layer {
+  position: absolute; inset: 0;
+  will-change: transform;
+  transition: transform 0.05s linear;
+}
+.hero-layer-bg {
+  background: radial-gradient(ellipse 80% 60% at 50% 40%,
+    rgba(74,163,107,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 70% at 80% 70%,
+    rgba(201,162,39,0.08) 0%, transparent 60%),
+    var(--ink);
+}
+#hero-canvas {
+  width: 100%; height: 100%; display: block; opacity: 0.5;
+}
+.hero-content {
+  position: relative; z-index: 3;
+  text-align: center; padding: 40px 24px;
+  max-width: 900px;
+  animation: fadeUp 1.2s ease 2s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-eyebrow {
+  font-family: var(--font-ui); font-size: 0.78rem;
+  color: var(--gold); letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: 20px;
+  border: 1px solid rgba(201,162,39,0.3);
+  display: inline-block; padding: 6px 18px; border-radius: 20px;
+}
+.hero-title {
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 5.5vw, 3.8rem);
+  color: var(--white); font-weight: normal;
+  line-height: 1.18; margin-bottom: 24px;
+  letter-spacing: -0.01em;
+}
+.hero-title em { color: var(--gold); font-style: normal; }
+.hero-body {
+  font-size: 1.12rem; color: rgba(255,255,255,0.72);
+  line-height: 1.75; max-width: 680px; margin: 0 auto 36px;
+}
+.hero-stats {
+  display: flex; gap: 32px; justify-content: center;
+  flex-wrap: wrap; margin-bottom: 40px;
+}
+.hero-stat {
+  text-align: center;
+}
+.hero-stat-num {
+  font-family: var(--font-mono); font-size: 1.8rem;
+  color: var(--gold); display: block; font-weight: bold;
+}
+.hero-stat-label {
+  font-family: var(--font-ui); font-size: 0.72rem;
+  color: var(--mist); text-transform: uppercase; letter-spacing: 0.1em;
+}
+.hero-cta {
+  display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.btn-primary {
+  background: var(--gold); color: var(--ink);
+  border: none; font-family: var(--font-ui); font-size: 0.85rem;
+  font-weight: bold; letter-spacing: 0.06em;
+  padding: 13px 28px; border-radius: var(--radius);
+  cursor: pointer; transition: background var(--trans), transform 0.15s;
+  text-decoration: none; display: inline-block;
+}
+.btn-primary:hover { background: var(--gold-lt); transform: translateY(-2px); }
+.btn-outline {
+  background: transparent; color: var(--white);
+  border: 1px solid rgba(255,255,255,0.4);
+  font-family: var(--font-ui); font-size: 0.85rem;
+  letter-spacing: 0.06em; padding: 13px 28px;
+  border-radius: var(--radius); cursor: pointer;
+  transition: border-color var(--trans), background var(--trans), transform 0.15s;
+  text-decoration: none; display: inline-block;
+}
+.btn-outline:hover {
+  border-color: var(--gold); background: rgba(201,162,39,0.08);
+  transform: translateY(-2px);
+}
+.hero-scroll-hint {
+  position: absolute; bottom: 32px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-family: var(--font-ui); font-size: 0.7rem;
+  color: rgba(255,255,255,0.35); letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: bob 2.2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(6px); }
+}
+.scroll-arrow { font-size: 1.2rem; }
+
+/* =============================================================================
+   LAYOUT — Page structure, container system
+============================================================================= */
+.page-body { max-width: 1340px; margin: 0 auto; padding: 0 24px; }
+
+/* Parallax section wrappers — JS adds data-parallax-offset to children */
+.parallax-section {
+  position: relative; overflow: hidden;
+}
+
+/* Full-bleed dark bands between content */
+.band {
+  padding: 80px 0;
+}
+.band--dark {
+  background: var(--ink-mid);
+  color: var(--white);
+}
+.band--forest {
+  background: var(--ink);
+  color: var(--white);
+}
+.band--cream { background: var(--cream); }
+.band--sand  { background: var(--cream-dk); }
+
+.section-header {
+  margin-bottom: 48px;
+}
+.section-eyebrow {
+  font-family: var(--font-ui); font-size: 0.72rem;
+  color: var(--gold); text-transform: uppercase;
+  letter-spacing: 0.2em; margin-bottom: 10px;
+  display: block;
+}
+.section-title {
+  font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+  font-weight: normal; line-height: 1.2;
+  margin-bottom: 16px;
+}
+.section-lead {
+  font-size: 1.05rem; line-height: 1.8;
+  max-width: 780px; opacity: 0.85;
+}
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px,1fr)); gap: 28px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 20px; }
+
+/* Cards */
+.card {
+  background: var(--white); border-radius: var(--radius);
+  border: 1px solid var(--sand);
+  padding: 24px; box-shadow: var(--shadow-sm);
+  transition: transform var(--trans), box-shadow var(--trans);
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.card--dark {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+}
+.card--dark:hover { background: rgba(255,255,255,0.09); }
+.card-num {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--gold); letter-spacing: 0.1em;
+  margin-bottom: 10px; display: block;
+}
+.card-title {
+  font-size: 1.05rem; font-weight: bold;
+  margin-bottom: 10px; line-height: 1.3;
+}
+.card-body { font-size: 0.9rem; line-height: 1.7; opacity: 0.82; }
+.card-tag {
+  display: inline-block; margin-top: 12px;
+  background: rgba(201,162,39,0.12); color: var(--gold);
+  font-family: var(--font-ui); font-size: 0.68rem;
+  padding: 3px 10px; border-radius: 12px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* =============================================================================
+   COLLAPSIBLE SECTIONS
+   Uses <details>/<summary> for zero-JS fallback plus enhanced JS animations.
+   To add new items: copy the <details class="collapse-item"> pattern below.
+============================================================================= */
+.collapse-group { display: flex; flex-direction: column; gap: 6px; }
+.collapse-item {
+  border: 1px solid var(--sand); border-radius: var(--radius);
+  background: var(--white); overflow: hidden;
+  transition: box-shadow var(--trans);
+}
+.collapse-item[open] { box-shadow: var(--shadow-sm); }
+.collapse-item summary {
+  list-style: none; cursor: pointer;
+  padding: 16px 20px;
+  font-family: var(--font-ui); font-size: 0.9rem; font-weight: bold;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; user-select: none;
+  transition: background var(--trans);
+}
+.collapse-item summary:hover { background: rgba(74,163,107,0.06); }
+.collapse-item summary::after {
+  content: '+'; font-size: 1.2rem; color: var(--leaf);
+  flex-shrink: 0; transition: transform var(--trans);
+}
+.collapse-item[open] summary::after { transform: rotate(45deg); }
+.collapse-item summary::-webkit-details-marker { display: none; }
+.collapse-body {
+  padding: 0 20px 20px;
+  font-size: 0.9rem; line-height: 1.75;
+}
+
+/* Dark variant for collapse on dark bands */
+.collapse-item--dark {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+  color: var(--white);
+}
+.collapse-item--dark summary:hover { background: rgba(255,255,255,0.06); }
+
+/* =============================================================================
+   GAMIFICATION HUD
+   Fixed floating panel. Tracks: sections visited, actions taken, "level."
+   All data stored in IndexedDB. User can dismiss or reset.
+============================================================================= */
+#hud {
+  position: fixed; bottom: 20px; right: 20px; z-index: 800;
+  background: rgba(11,31,22,0.95); border: 1px solid rgba(201,162,39,0.35);
+  border-radius: 10px; padding: 14px 16px;
+  width: 230px; box-shadow: var(--shadow);
+  font-family: var(--font-ui); font-size: 0.78rem;
+  backdrop-filter: blur(10px);
+  transition: transform var(--trans), opacity var(--trans);
+}
+#hud.collapsed { width: 46px; padding: 8px; overflow: hidden; }
+#hud-toggle {
+  position: absolute; top: -10px; left: -10px;
+  background: var(--gold); border: none; border-radius: 50%;
+  width: 22px; height: 22px; cursor: pointer; font-size: 0.65rem;
+  color: var(--ink); font-weight: bold; line-height: 22px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.hud-title {
+  color: var(--gold); font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 0.12em; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.hud-title-dot {
+  width: 6px; height: 6px; background: var(--canopy);
+  border-radius: 50%; animation: blink 1.8s ease-in-out infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+.hud-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 7px; color: rgba(255,255,255,0.75);
+}
+.hud-val { color: var(--gold-lt); font-weight: bold; }
+.hud-bar-wrap {
+  background: rgba(255,255,255,0.1); border-radius: 3px;
+  height: 5px; margin: 6px 0 10px; overflow: hidden;
+}
+.hud-bar {
+  height: 100%; background: linear-gradient(90deg, var(--leaf), var(--gold));
+  border-radius: 3px; transition: width 0.6s ease;
+  width: 0%;
+}
+.hud-actions {
+  display: flex; gap: 6px; margin-top: 10px;
+}
+.hud-btn {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6); padding: 4px 8px; border-radius: 4px;
+  cursor: pointer; font-size: 0.68rem; flex: 1;
+  transition: background var(--trans);
+}
+.hud-btn:hover { background: rgba(201,162,39,0.2); color: var(--gold); }
+.hud-level-badge {
+  display: inline-block; background: var(--leaf);
+  color: var(--white); font-size: 0.62rem; padding: 2px 8px;
+  border-radius: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* =============================================================================
+   CONSTELLATION VISUALIZER
+   SVG/Canvas widget showing which sections have been explored. Each node
+   represents a section. Visited = glowing dot; unvisited = dim.
+============================================================================= */
+#constellation-panel {
+  position: fixed; bottom: 20px; left: 20px; z-index: 800;
+  background: rgba(11,31,22,0.92); border: 1px solid rgba(201,162,39,0.25);
+  border-radius: 10px; padding: 12px;
+  backdrop-filter: blur(10px); box-shadow: var(--shadow);
+}
+#constellation-canvas {
+  display: block; border-radius: 6px;
+}
+.constellation-label {
+  font-family: var(--font-ui); font-size: 0.62rem;
+  color: rgba(255,255,255,0.4); text-align: center;
+  margin-top: 6px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* =============================================================================
+   SETTINGS PANEL
+   Slide-in panel for preferences: theme, text size, HUD visibility, data reset.
+============================================================================= */
+#settings-panel {
+  position: fixed; top: 0; right: -380px;
+  width: 360px; height: 100vh;
+  background: var(--ink-mid); border-left: 1px solid rgba(255,255,255,0.1);
+  z-index: 950; overflow-y: auto;
+  transition: right 0.4s ease; padding: 60px 28px 28px;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.4);
+}
+#settings-panel.open { right: 0; }
+.settings-close {
+  position: absolute; top: 18px; right: 20px;
+  background: none; border: none; color: var(--white);
+  font-size: 1.4rem; cursor: pointer; opacity: 0.6;
+  transition: opacity var(--trans);
+}
+.settings-close:hover { opacity: 1; }
+.settings-title {
+  font-family: var(--font-ui); font-size: 0.72rem;
+  color: var(--gold); text-transform: uppercase;
+  letter-spacing: 0.15em; margin-bottom: 28px;
+}
+.settings-group { margin-bottom: 28px; }
+.settings-label {
+  font-family: var(--font-ui); font-size: 0.78rem;
+  color: rgba(255,255,255,0.6); margin-bottom: 8px;
+  display: block;
+}
+.settings-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px; color: rgba(255,255,255,0.85);
+  font-family: var(--font-ui); font-size: 0.82rem;
+}
+.toggle-switch {
+  width: 38px; height: 20px; background: rgba(255,255,255,0.15);
+  border-radius: 10px; cursor: pointer; position: relative;
+  transition: background var(--trans); border: none;
+}
+.toggle-switch.on { background: var(--leaf); }
+.toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; background: white;
+  border-radius: 50%; transition: left var(--trans);
+}
+.toggle-switch.on::after { left: 20px; }
+.danger-btn {
+  background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.4);
+  color: #e74c3c; font-family: var(--font-ui); font-size: 0.78rem;
+  padding: 9px 16px; border-radius: var(--radius);
+  cursor: pointer; width: 100%; text-align: left;
+  transition: background var(--trans);
+}
+.danger-btn:hover { background: rgba(192,57,43,0.3); }
+.settings-note {
+  font-size: 0.76rem; color: rgba(255,255,255,0.4);
+  line-height: 1.6; margin-top: 8px;
+}
+
+/* =============================================================================
+   DATA TABLE — For metrics, frameworks, evidence tables
+============================================================================= */
+.data-table-wrap { overflow-x: auto; margin: 20px 0; }
+.data-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.85rem; font-family: var(--font-ui);
+}
+.data-table th {
+  background: var(--ink-mid); color: var(--gold);
+  padding: 10px 14px; text-align: left;
+  font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.1em; white-space: nowrap;
+}
+.data-table td {
+  padding: 10px 14px; border-bottom: 1px solid var(--sand);
+  color: var(--ink); line-height: 1.5;
+}
+.data-table tr:hover td { background: rgba(74,163,107,0.06); }
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 10px;
+  font-size: 0.68rem; font-weight: bold; letter-spacing: 0.05em;
+}
+.badge-green { background: rgba(74,163,107,0.15); color: #2e7d32; }
+.badge-amber { background: rgba(201,162,39,0.15); color: #8a6a00; }
+.badge-red   { background: rgba(192,57,43,0.15);  color: #c0392b; }
+.badge-blue  { background: rgba(41,128,185,0.15); color: #1565c0; }
+
+/* =============================================================================
+   CALLOUT BOXES
+============================================================================= */
+.callout {
+  border-left: 4px solid var(--leaf); background: rgba(74,163,107,0.07);
+  padding: 18px 20px; border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 24px 0;
+}
+.callout--gold { border-left-color: var(--gold); background: rgba(201,162,39,0.07); }
+.callout--red  { border-left-color: var(--danger); background: rgba(192,57,43,0.06); }
+.callout-label {
+  font-family: var(--font-ui); font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 6px; color: var(--leaf); font-weight: bold;
+}
+.callout--gold .callout-label { color: var(--gold); }
+.callout--red  .callout-label { color: var(--danger); }
+
+/* Timeline component */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 2px; background: var(--sand);
+}
+.timeline-item { position: relative; margin-bottom: 28px; }
+.timeline-dot {
+  position: absolute; left: -24px; top: 4px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--leaf); border: 2px solid var(--white);
+  box-shadow: 0 0 0 3px rgba(74,163,107,0.3);
+}
+.timeline-date {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--gold); margin-bottom: 4px;
+}
+.timeline-title { font-weight: bold; font-size: 0.92rem; margin-bottom: 6px; }
+.timeline-body { font-size: 0.87rem; line-height: 1.65; opacity: 0.8; }
+
+/* Country cards for International Engagement */
+.country-card {
+  background: var(--white); border: 1px solid var(--sand);
+  border-radius: var(--radius); overflow: hidden;
+  transition: transform var(--trans), box-shadow var(--trans);
+}
+.country-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.country-flag {
+  font-size: 2.4rem; display: block;
+  padding: 20px 20px 12px; line-height: 1;
+}
+.country-body { padding: 0 20px 20px; }
+.country-name { font-weight: bold; font-size: 1rem; margin-bottom: 4px; }
+.country-role { font-family: var(--font-ui); font-size: 0.72rem; color: var(--leaf); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.country-text { font-size: 0.83rem; line-height: 1.6; color: rgba(0,0,0,0.72); }
+
+/* =============================================================================
+   PRINT STYLES
+   HUD, nav, splash, constellation hidden. Clean academic layout preserved.
+============================================================================= */
+@media print {
+  #splash, #topnav, #hud, #constellation-panel, #settings-panel,
+  .hero-scroll-hint, .nav-right, .btn-primary, .btn-outline { display: none !important; }
+  body { background: white; color: black; font-size: 11pt; }
+  .band--dark, .band--forest { background: white; color: black; }
+  .card, .card--dark {
+    background: white; border: 1px solid #ccc;
+    break-inside: avoid; box-shadow: none;
+  }
+  #hero { min-height: auto; background: white; color: black; }
+  .hero-title, .hero-body, .hero-eyebrow { color: black; }
+  a { color: black; }
+  .section-title, .card-title { color: black; }
+  .collapse-item { border: 1px solid #ccc; }
+  .collapse-body { display: block !important; }
+}
+
+/* =============================================================================
+   RESPONSIVE
+============================================================================= */
+@media (max-width: 768px) {
+  #constellation-panel { display: none; }
+  #hud { bottom: 12px; right: 12px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .hero-stats { gap: 20px; }
+  .band { padding: 52px 0; }
+}
+@media (max-width: 480px) {
+  #hud { width: calc(100% - 24px); right: 12px; bottom: 12px; }
+  .nav-link { padding: 14px 8px; font-size: 0.7rem; }
+}
+
+/* Tooltip */
+[data-tip] { position: relative; cursor: help; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(11,31,22,0.97); color: var(--cream);
+  font-family: var(--font-ui); font-size: 0.72rem;
+  padding: 7px 12px; border-radius: 5px;
+  white-space: nowrap; max-width: 260px;
+  white-space: normal; text-align: center;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.2s; z-index: 200;
+  border: 1px solid rgba(201,162,39,0.25);
+  line-height: 1.5;
+}
+[data-tip]:hover::after { opacity: 1; }
+
+/* Utility */
+.mt-8  { margin-top:  8px; } .mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; } .mt-40 { margin-top: 40px; }
+.mb-8  { margin-bottom: 8px; } .mb-16 { margin-bottom: 16px; }
+.text-gold { color: var(--gold); }
+.text-mist { color: var(--mist); }
+.font-mono { font-family: var(--font-mono); }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* Toast notification */
+#toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(30px);
+  background: var(--ink-mid); color: var(--white);
+  font-family: var(--font-ui); font-size: 0.82rem;
+  padding: 10px 22px; border-radius: 20px;
+  border: 1px solid rgba(201,162,39,0.3);
+  opacity: 0; transition: opacity 0.3s, transform 0.3s; z-index: 900;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+
+<body>
+<!-- Accessibility skip link -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- =============================================================================
+     NOSCRIPT FALLBACK
+     Full static content displayed when JavaScript is disabled.
+     All policy content remains accessible without JS.
+============================================================================= -->
+<noscript>
+<div style="background:#1e3a2f;color:#fff;padding:16px 24px;text-align:center;font-family:Arial,sans-serif;font-size:0.9rem;">
+  <strong>JavaScript is disabled.</strong> The interactive features, gamification HUD, and constellation visualizer require JavaScript. All policy and research content remains fully accessible below.
+</div>
+</noscript>
+
+<!-- =============================================================================
+     SPLASH SCREEN
+     Animated constellation background + progress bar. Dismissed on load.
+     Stored in IndexedDB: key "seenSplash" prevents repeat on return visits.
+============================================================================= -->
+<div id="splash" role="dialog" aria-modal="true" aria-label="Loading splash screen">
+  <canvas id="splash-canvas" aria-hidden="true"></canvas>
+  <div class="splash-inner">
+    <div class="splash-logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2 C9 2 2 9 2 16 C2 23 9 30 16 30 C23 30 30 23 30 16 C30 9 23 2 16 2Z M16 6 L18 12 L24 12 L19.5 15.5 L21.5 22 L16 18.5 L10.5 22 L12.5 15.5 L8 12 L14 12 Z"/>
+      </svg>
+    </div>
+    <h1 class="splash-title">Africa Atmospheric<br>Cascade Initiative</h1>
+    <p class="splash-sub">Government &amp; Policy Intelligence Platform</p>
+    <div class="splash-progress" role="progressbar" aria-label="Loading">
+      <div class="splash-bar"></div>
+    </div>
+    <p class="splash-version">v3.0 · PhD Policy Intelligence · ZeroStorm Architecture</p>
+  </div>
+</div>
+
+<!-- =============================================================================
+     STICKY TOP NAVIGATION
+     Hides on scroll down, reappears on scroll up. Active section highlighted.
+     Search input debounced to 280ms to rate-limit queries.
+============================================================================= -->
+<nav id="topnav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <span class="nav-logo">AACI</span>
+    <a href="#executive"    class="nav-link">Executive Brief</a>
+    <a href="#science"      class="nav-link">Atmospheric Science</a>
+    <a href="#ecosystems"   class="nav-link">Ecosystems</a>
+    <a href="#topography"   class="nav-link">Hydrology</a>
+    <a href="#species"      class="nav-link">Species</a>
+    <a href="#policy"       class="nav-link">Policy Frameworks</a>
+    <a href="#international" class="nav-link">International</a>
+    <a href="#governance"   class="nav-link">Governance</a>
+    <a href="#missions"     class="nav-link">Missions</a>
+    <a href="#research"     class="nav-link">Research</a>
+    <a href="#questions"    class="nav-link">Horizons</a>
+    <div class="nav-right">
+      <div style="position:relative;">
+        <input type="search" id="nav-search" placeholder="Search platform…"
+               aria-label="Search platform content" autocomplete="off"
+               maxlength="120">
+        <div id="search-results" role="listbox" aria-label="Search results"></div>
+      </div>
+      <button class="nav-btn" id="settings-open-btn" aria-label="Open settings">⚙ Settings</button>
+      <button class="nav-btn" onclick="window.print()" aria-label="Print page">⎙ Print</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Toast notification element -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- =============================================================================
+     HERO — Parallax with animated canvas
+============================================================================= -->
+<div id="hero" class="parallax-section" role="banner">
+  <div class="hero-layer hero-layer-bg" data-parallax="0.35"></div>
+  <canvas id="hero-canvas" data-parallax="0.2" aria-hidden="true"></canvas>
+  <div class="hero-content" data-parallax="0.08">
+    <span class="hero-eyebrow">Atmospheric · Ecological · Policy</span>
+    <h2 class="hero-title">
+      Restoring Africa's<br>
+      <em>Atmospheric Engine</em>
+    </h2>
+    <p class="hero-body">
+      A PhD-level intelligence platform for heads of state, environment ministers,
+      climate negotiators, and multilateral institutions. Integrating atmospheric
+      science, hydrological cascade modelling, and regenerative land policy into
+      an actionable continental framework.
+    </p>
+    <div class="hero-stats" aria-label="Platform statistics">
+      <div class="hero-stat">
+        <span class="hero-stat-num">54</span>
+        <span class="hero-stat-label">Nations Covered</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">8</span>
+        <span class="hero-stat-label">Major Biomes</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">30.4M</span>
+        <span class="hero-stat-label">km² of Dryland</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">4.3B</span>
+        <span class="hero-stat-label">Tonnes CO₂ Potential</span>
+      </div>
+    </div>
+    <div class="hero-cta">
+      <a href="#executive" class="btn-primary">Read Executive Brief</a>
+      <a href="#international" class="btn-outline">Partner as a Nation</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint" aria-hidden="true">
+    <span class="scroll-arrow">↓</span>
+    <span>Scroll to explore</span>
+  </div>
+</div>
+
+<!-- ============================================================ MAIN CONTENT -->
+<main id="main-content">
+
+<!-- =============================================================================
+     1. EXECUTIVE SUMMARY
+     Designed for heads of state and ministers. Emphasises strategic framing.
+============================================================================= -->
+<div id="executive" class="band band--dark">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 01 · Strategic Overview</span>
+      <h2 class="section-title">Executive Summary &amp; Strategic Rationale</h2>
+      <p class="section-lead">
+        Africa's biomes collectively constitute the largest terrestrial moisture recycling
+        system in the Southern Hemisphere. Disruption of this system through deforestation,
+        soil degradation, and wetland drainage generates feedback loops that reduce inland
+        rainfall, accelerate desertification, and destabilise food security across interconnected
+        national economies. This platform provides the analytical and policy infrastructure
+        required to reverse these cascades at continental scale.
+      </p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div class="card card--dark">
+        <span class="card-num">01.A</span>
+        <h3 class="card-title">The Atmospheric Stakes</h3>
+        <p class="card-body">
+          The African continent produces approximately 30% of global terrestrial
+          evapotranspiration. Loss of forest cover across the Congo Basin alone has been
+          correlated with a measurable 10–15% reduction in downwind rainfall across the
+          Sahel and East African highlands. Restoring biotic pump function is not merely
+          an ecological act — it is a hydrological and macroeconomic imperative.
+        </p>
+        <span class="card-tag">Atmospheric Science</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">01.B</span>
+        <h3 class="card-title">The Policy Opportunity</h3>
+        <p class="card-body">
+          The African Union's Agenda 2063, combined with the Great Green Wall Initiative,
+          the Nairobi Declaration on Carbon Markets, and Article 6 of the Paris Agreement,
+          creates an unprecedented financing and governance window. This platform maps
+          those instruments to specific ecosystem interventions and identifies leverage
+          points where restoration investment yields compounding atmospheric, ecological,
+          and economic returns.
+        </p>
+        <span class="card-tag">Policy Architecture</span>
+      </div>
+    </div>
+
+    <div class="callout callout--gold mt-40 reveal">
+      <div class="callout-label">Core Thesis</div>
+      <p>
+        Atmospheric restoration is not separable from land governance, food security, or
+        economic sovereignty. The cascade model proposed here treats rainfall, biodiversity,
+        soil carbon, and political stability as co-evolving outputs of a single policy
+        intervention portfolio — not as independent departments of government.
+      </p>
+    </div>
+
+    <div class="mt-40 reveal">
+      <h3 style="margin-bottom:20px;font-size:1.15rem;">Key Indicators Requiring Government Action</h3>
+      <div class="data-table-wrap">
+        <table class="data-table" aria-label="Key indicators">
+          <thead>
+            <tr>
+              <th>Indicator</th><th>Current Trend</th>
+              <th>Cascade Risk</th><th>Intervention Window</th>
+              <th>Priority</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Congo Basin deforestation rate</td><td>−0.4% forest cover/yr</td><td>Sahel rainfall reduction</td><td>5–10 years</td><td><span class="badge badge-red">Critical</span></td></tr>
+            <tr><td>Sahel soil organic carbon</td><td>Declining 0.2 t/ha/yr</td><td>Dust aerosol → reduced albedo</td><td>Immediate</td><td><span class="badge badge-red">Critical</span></td></tr>
+            <tr><td>East African wetland drainage</td><td>−11% since 2000</td><td>Regional moisture recycling</td><td>3–7 years</td><td><span class="badge badge-amber">High</span></td></tr>
+            <tr><td>West African mangrove loss</td><td>−5% per decade</td><td>Coastal rainfall and fisheries</td><td>Ongoing</td><td><span class="badge badge-amber">High</span></td></tr>
+            <tr><td>Southern African grassland conversion</td><td>+2.1M ha/yr</td><td>Water table and fire cycles</td><td>10–20 years</td><td><span class="badge badge-amber">High</span></td></tr>
+            <tr><td>Great Green Wall implementation pace</td><td>~18% of target</td><td>Sahara expansion buffer</td><td>5 years</td><td><span class="badge badge-amber">High</span></td></tr>
+            <tr><td>Urban heat island expansion</td><td>+1.4°C/decade in capitals</td><td>Regional micro-climate shifts</td><td>Ongoing</td><td><span class="badge badge-blue">Monitor</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     2. ATMOSPHERIC SCIENCE — PhD-Level Foundations
+============================================================================= -->
+<div id="science" class="band band--cream">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 02 · Scientific Foundations</span>
+      <h2 class="section-title">Atmospheric Cascade Mechanics</h2>
+      <p class="section-lead">
+        Understanding the biotic pump hypothesis, atmospheric moisture recycling ratios,
+        and land-surface–atmosphere feedbacks as the scientific basis for continental
+        restoration policy. This section is designed for scientific advisers, academic
+        institutions, and technically-briefed ministers.
+      </p>
+    </div>
+
+    <div class="grid-3 reveal">
+      <div class="card">
+        <span class="card-num">02.A</span>
+        <h3 class="card-title" data-tip="Makarieva & Gorshkov (2007) formulation of forest-driven atmospheric moisture pumping">Biotic Pump Theory</h3>
+        <p class="card-body">
+          Forests generate low-pressure zones through transpiration-driven condensation,
+          drawing moist air from coastal zones inland. Dense continuous forest cover acts
+          as an atmospheric pump capable of sustaining inland rainfall 1,000–3,000 km from
+          the coast — a mechanism critically dependent on canopy continuity rather than
+          total tree count.
+        </p>
+        <span class="card-tag">Atmospheric Physics</span>
+      </div>
+      <div class="card">
+        <span class="card-num">02.B</span>
+        <h3 class="card-title" data-tip="Ratio of precipitation that has cycled through vegetation versus direct ocean evaporation">Moisture Recycling Ratios</h3>
+        <p class="card-body">
+          In the Congo Basin, isotopic tracer studies indicate that 30–40% of inland
+          precipitation derives from continental evapotranspiration rather than direct
+          ocean moisture. In the Sahel, this recycling ratio drops to 15–25%, directly
+          correlating with vegetation loss. Restoring the recycling ratio is measurable
+          within 5–10 years of large-scale agroforestry interventions.
+        </p>
+        <span class="card-tag">Hydrometeorology</span>
+      </div>
+      <div class="card">
+        <span class="card-num">02.C</span>
+        <h3 class="card-title" data-tip="Soil moisture and albedo changes triggered by land cover transitions">Land-Surface Feedbacks</h3>
+        <p class="card-body">
+          Bare or degraded soils increase surface albedo, suppress convective rainfall
+          initiation, and reduce latent heat flux. Models indicate that widespread
+          desertification in the Sahara-Sahel zone was partially self-reinforcing after
+          a vegetation threshold was crossed approximately 5,500 years ago — the same
+          dynamic applies in reverse if restoration passes a critical mass threshold.
+        </p>
+        <span class="card-tag">Climatology</span>
+      </div>
+    </div>
+
+    <div class="mt-40 reveal">
+      <h3 style="margin-bottom:24px;font-size:1.15rem;">Cascade Mechanism: From Forest to Rainfall Policy</h3>
+      <div class="collapse-group" role="list">
+        <details class="collapse-item" role="listitem">
+          <summary>Stage 1 — Vegetation Transpiration &amp; Condensation Nuclei</summary>
+          <div class="collapse-body">
+            <p>Leaf transpiration releases water vapour enriched with biogenic volatile organic compounds (BVOCs). These compounds nucleate cloud formation at lower atmospheric moisture thresholds than dust or sea salt particles — meaning that forests actively lower the rainfall trigger threshold. Dense forest patches effectively "seed" clouds for downwind regions, creating a cascade of moisture delivery that extends hundreds of kilometres beyond the forest boundary itself.</p>
+            <p class="mt-16"><strong>Policy implication:</strong> Forest protection in one nation directly subsidises rainfall in its neighbours. This creates the basis for transboundary payment-for-ecosystem-services frameworks.</p>
+          </div>
+        </details>
+        <details class="collapse-item" role="listitem">
+          <summary>Stage 2 — Atmospheric Pressure Gradients &amp; Inland Moisture Transport</summary>
+          <div class="collapse-body">
+            <p>Water vapour condensation releases latent heat and reduces atmospheric pressure over forested areas. This pressure differential draws moist marine air inland along predictable corridors — the Atlantic coast toward the Congo, the Indian Ocean monsoon toward East Africa, and Mediterranean moisture toward the Maghreb. When forests are cleared, this pressure gradient weakens, and moist air stalls at the coast rather than penetrating inland.</p>
+            <p class="mt-16"><strong>Policy implication:</strong> Coastal zone afforestation is strategically more valuable per hectare than inland planting for initiating moisture transport recovery. Prioritise coastal and ridge forests in restoration sequencing.</p>
+          </div>
+        </details>
+        <details class="collapse-item" role="listitem">
+          <summary>Stage 3 — Soil Carbon, Water Retention &amp; Baseflow Regulation</summary>
+          <div class="collapse-body">
+            <p>Vegetation loss reduces organic matter inputs to soil, degrading structure and water-holding capacity. Degraded soils produce higher peak surface runoff (flash flooding) but lower dry-season baseflows in rivers — a paradox of more water events but less available water. Soil organic carbon above 2.5% by weight enables infiltration rates 3–5x higher than degraded soils, sustaining river flows between rainfall events and buffering downstream communities against drought.</p>
+            <p class="mt-16"><strong>Policy implication:</strong> Soil carbon restoration is a water security policy instrument, not merely a climate mitigation tool. Integrate soil health metrics into national water accounts and infrastructure planning.</p>
+          </div>
+        </details>
+        <details class="collapse-item" role="listitem">
+          <summary>Stage 4 — Ecosystem Cascade: Biodiversity as Infrastructure</summary>
+          <div class="collapse-body">
+            <p>Large mammals (elephants, hippos, buffalo) disperse seeds, create waterholes, and maintain open corridors that regulate fire intensity and grassland composition. Loss of megafauna triggers vegetation homogenisation and increased flammability — releasing stored carbon and disrupting rainfall-vegetation feedbacks. Similarly, dung beetle populations regulate soil aeration and moisture cycling at scales measurable in regional water table data.</p>
+            <p class="mt-16"><strong>Policy implication:</strong> Wildlife corridor legislation and anti-poaching investment must be classified alongside water infrastructure in national development accounts. Their hydrological value is measurable and should be monetised through carbon and water credit mechanisms.</p>
+          </div>
+        </details>
+        <details class="collapse-item" role="listitem">
+          <summary>Stage 5 — Tipping Points, Regime Shifts &amp; Irreversibility</summary>
+          <div class="collapse-body">
+            <p>Palaeoclimatic and contemporary modelling identifies several tipping thresholds in African ecosystems: (i) the Congo Basin requires &gt;80% intact canopy cover to sustain biotic pump function; (ii) the Sahel shows bistability between vegetation-dominated and bare-soil states, with transitions potentially irreversible at decadal timescales without active restoration; (iii) East African montane forests below 40% cover show disproportionate river flow reductions due to cloud stripping loss.</p>
+            <p class="mt-16"><strong>Policy implication:</strong> The risk calculus for restoration investment must account for irreversibility. A 10-year delay in intervention may require 50–100 years of recovery. This frames restoration as preventive infrastructure against catastrophic lock-in costs — not as a discretionary environmental expenditure.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     3. ECOSYSTEM MAPPING
+============================================================================= -->
+<div id="ecosystems" class="band band--forest">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 03 · Biome Intelligence</span>
+      <h2 class="section-title" style="color:var(--white);">Ecosystem Mapping Engine</h2>
+      <p class="section-lead" style="color:rgba(255,255,255,0.75);">
+        Eight major biome categories across 54 nations, each with distinct atmospheric
+        cascade roles, land governance challenges, and restoration intervention profiles.
+        Policy pathways differ fundamentally across biome boundaries.
+      </p>
+    </div>
+    <div class="grid-4 reveal">
+      <div class="card card--dark">
+        <span class="card-num">03.A</span>
+        <h3 class="card-title" style="color:var(--white);">Tropical Rainforest</h3>
+        <p class="card-body">Congo Basin (3.3M km²). Highest evapotranspiration rates on the continent. Biotic pump anchor system. Priority: halt industrial logging via REDD+ instrument reform.</p>
+        <span class="card-tag">Critical Anchor</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">03.B</span>
+        <h3 class="card-title" style="color:var(--white);">Savanna &amp; Miombo</h3>
+        <p class="card-body">Largest biome by area (~13M km²). Carbon dense when intact. Highly vulnerable to charcoal production pressure. Requires community forest tenure reform.</p>
+        <span class="card-tag">High Area Priority</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">03.C</span>
+        <h3 class="card-title" style="color:var(--white);">Sahel Dryland</h3>
+        <p class="card-body">Transition zone with bistable climate regime. Great Green Wall corridor. Farmer-Managed Natural Regeneration (FMNR) proven at scale in Niger, Burkina Faso.</p>
+        <span class="card-tag">Tipping Zone</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">03.D</span>
+        <h3 class="card-title" style="color:var(--white);">East African Highland Mosaic</h3>
+        <p class="card-body">Cloud forest systems driving Ethiopian Blue Nile, Mara and Tana river systems. Direct correlation between montane forest loss and Nile baseflow reduction.</p>
+        <span class="card-tag">Watershed Tower</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">03.E</span>
+        <h3 class="card-title" style="color:var(--white);">Coastal &amp; Mangrove</h3>
+        <p class="card-body">5,700 km of mangrove fringe across 26 coastal nations. Stores 3–5x more carbon per hectare than tropical rainforest. Critical nursery habitat and storm buffer.</p>
+        <span class="card-tag">Blue Carbon</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">03.F</span>
+        <h3 class="card-title" style="color:var(--white);">Mediterranean Maquis</h3>
+        <p class="card-body">North African cork oak forests and Maghreb cedar systems. High-value water capture in Atlas ranges. Severely impacted by wildfire intensification since 2000.</p>
+        <span class="card-tag">Fire Risk Zone</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">03.G</span>
+        <h3 class="card-title" style="color:var(--white);">Southern African Fynbos &amp; Grassland</h3>
+        <p class="card-body">Global biodiversity hotspot. Extraordinarily high endemism. Groundwater recharge function for Cape Water System. Threatened by alien invasive species.</p>
+        <span class="card-tag">Biodiversity Vault</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">03.H</span>
+        <h3 class="card-title" style="color:var(--white);">Desert &amp; Hyperarid</h3>
+        <p class="card-body">Sahara, Namib, Kalahari. Not restoration-passive — fog harvesting, subsurface moisture, cryptobiotic soil crust restoration all viable at margin zones.</p>
+        <span class="card-tag">Margin Opportunity</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     4. TOPOGRAPHY & WATERSHED
+============================================================================= -->
+<div id="topography" class="band band--sand">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 04 · Hydrology</span>
+      <h2 class="section-title">Topography, Watershed &amp; Hydrospheric Intelligence</h2>
+      <p class="section-lead">
+        Identifying atmospheric leverage points through terrain analysis: ridge forests,
+        river basin headwaters, wetland complexes, and orographic rainfall zones
+        represent the highest-return restoration investment sites at continental scale.
+      </p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div>
+        <h3 style="margin-bottom:20px;font-size:1.1rem;">Major Transboundary Watersheds &amp; Policy Stakes</h3>
+        <div class="collapse-group">
+          <details class="collapse-item">
+            <summary>Nile Basin — 11 Nations, 500M Dependents</summary>
+            <div class="collapse-body">
+              <p>The Nile Basin Initiative involves 11 nations whose water security is directly coupled to land cover in the Ethiopian Highlands and Central African Great Lakes region. Ethiopian deforestation has been measured to correlate with a 12% reduction in Blue Nile dry-season flow since 1970. The filling of the Grand Ethiopian Renaissance Dam has created an acute political crisis that is fundamentally a land-use and atmospheric cascade failure, expressed through hydro-political tension. A continental restoration framework that restores upstream forest cover reduces downstream-upstream water conflict risk by improving total flow volume and reducing inter-annual variability.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Congo River Basin — 3.7M km², Second Largest Discharge Globally</summary>
+            <div class="collapse-body">
+              <p>The Congo River discharges ~41,000 m³/s, second only to the Amazon. Its intact rainforest generates moisture that recycles back across Central, East, and parts of West Africa. Any large-scale deforestation scenario in the DRC generates downstream rainfall reductions across Uganda, Kenya, Tanzania, and Mozambique that have not been fully incorporated into those nations' water planning. Policy frameworks for the Congo must treat the basin as continental atmospheric infrastructure owned collectively by downwind nations — not merely as a resource of the riparian states.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Niger River — 9 Nations, Sahel Lifeline</summary>
+            <div class="collapse-body">
+              <p>The Niger River's flow originates in the Guinea Highlands and travels through the Sahel's most vulnerable drylands. Flow variability has increased significantly since the 1970s — directly correlating with upstream deforestation and Sahel vegetation loss. Restoration interventions in Guinea and Mali headwater zones demonstrate measurable downstream flow improvements within 3–5 years. This basin is the most direct application site for the Great Green Wall atmospheric cascade model.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Zambezi &amp; Okavango — Southern Africa's Atmospheric Regulator</summary>
+            <div class="collapse-body">
+              <p>The Okavango Delta acts as a continental moisture release valve, sustaining Botswana's climate and atmospheric moisture to the Kalahari margin. The Zambezi's Victoria Falls flow has declined measurably with upper catchment deforestation in Zambia and Zimbabwe. Both systems are under pressure from hydropower development, agricultural expansion, and climate change — making their watershed forests among the most strategically valuable restoration targets on the continent.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:20px;font-size:1.1rem;">Hydrospheric Cascade Technologies</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">TIER 1 — IMMEDIATE IMPACT</div>
+            <div class="timeline-title">Farmer-Managed Natural Regeneration (FMNR)</div>
+            <div class="timeline-body">Low-cost, community-controlled regreening of dormant root systems. Proven in Niger's 5M hectare transformation. Policy requirement: tenure security and legal right to standing trees for farmers.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">TIER 2 — 3–7 YEAR HORIZON</div>
+            <div class="timeline-title">Swale, Bund &amp; Micro-Catchment Networks</div>
+            <div class="timeline-body">Contour earthworks capturing surface runoff and recharging groundwater. Combined with vegetation, produces measurable water table recovery and perennial spring restoration within 5 years at Loess Plateau and Tigray scales.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">TIER 3 — 10–20 YEAR HORIZON</div>
+            <div class="timeline-title">Wetland &amp; Floodplain Restoration</div>
+            <div class="timeline-body">Rewetting drained floodplains restores atmospheric evapotranspiration, baseflow regulation, and nitrogen cycling. High upfront investment, extreme long-term water security return. Requires land acquisition, community consent, and multilateral financing.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">TIER 4 — CONTINENTAL SCALE</div>
+            <div class="timeline-title">Biotic Corridor Network Design</div>
+            <div class="timeline-body">Contiguous forest and grassland corridors enabling moisture transport from coast to interior. Requires supranational land-use planning frameworks — the primary governance challenge at this scale.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     5. SPECIES SELECTION ENGINE
+============================================================================= -->
+<div id="species" class="band band--dark">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 05 · Ecological Intelligence</span>
+      <h2 class="section-title" style="color:var(--white);">Species Selection &amp; Keystone Ecology</h2>
+      <p class="section-lead" style="color:rgba(255,255,255,0.75);">
+        Species selection for atmospheric restoration is a precision science.
+        Wrong species choices have produced salinisation (Australian
+        Eucalyptus monocultures), water table depletion, and fire risk amplification.
+        Right choices regenerate entire hydrological systems within a decade.
+      </p>
+    </div>
+
+    <div class="grid-3 reveal">
+      <div class="card card--dark">
+        <span class="card-num">05.A</span>
+        <h3 class="card-title" style="color:var(--white);">Atmospheric Keystone Trees</h3>
+        <p class="card-body"><em>Acacia senegal</em> (gum arabic, nitrogen fixer), <em>Faidherbia albida</em> (reverse-leaf phenology — provides shade during dry season, drops leaves when crops need light), <em>Vitellaria paradoxa</em> (shea — high-transpiration agroforestry anchor). These species produce measurable local rainfall increases within 5–8 years of landscape-scale deployment.</p>
+        <span class="card-tag">Rainfall Enhancement</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">05.B</span>
+        <h3 class="card-title" style="color:var(--white);">Soil Carbon Engineers</h3>
+        <p class="card-body"><em>Tephrosia vogelii</em>, <em>Crotalaria juncea</em> (nitrogen fixers), <em>Piliostigma thonningii</em> (soil structure builders). Combined with biochar from agricultural waste, can restore soil organic carbon from 0.3% to 2.5% within 4–6 years — fundamentally changing the hydrology of treated catchments.</p>
+        <span class="card-tag">Soil Hydrology</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">05.C</span>
+        <h3 class="card-title" style="color:var(--white);">Ecological Process Animals</h3>
+        <p class="card-body">Forest elephants create canopy gaps that increase vegetation diversity and rainfall penetration. Hippopotamus faecal input drives 95% of river-edge nutrient cycling in African freshwater systems. Dung beetles in West African savannas reduce soil compaction measurable at watershed scale. Biodiversity is infrastructure — its loss has engineering consequences.</p>
+        <span class="card-tag">Zoogeomorphology</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">05.D</span>
+        <h3 class="card-title" style="color:var(--white);">Indigenous Ecological Knowledge</h3>
+        <p class="card-body">Dogon water management systems in Mali have sustained agriculture in marginal land for centuries using species-specific multi-strata agroforestry. Zai pit systems of Burkina Faso are scientifically validated as superior to engineered soil rehabilitation in degraded drylands. Policy frameworks must formally recognise and compensate holders of this knowledge.</p>
+        <span class="card-tag">Traditional Ecological Knowledge</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">05.E</span>
+        <h3 class="card-title" style="color:var(--white);">Coastal Ecosystem Engineers</h3>
+        <p class="card-body"><em>Rhizophora mangle</em> and <em>Avicennia marina</em> mangroves sequester carbon at 6–8 tC/ha/yr — 4x tropical forest rates. Combined with seagrass beds (<em>Thalassia hemprichii</em>) and saltmarshes, coastal blue carbon systems offer the fastest per-hectare carbon and rainfall stabilisation returns on the continent.</p>
+        <span class="card-tag">Blue Carbon</span>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">05.F</span>
+        <h3 class="card-title" style="color:var(--white);">Anti-Pattern Species Alert</h3>
+        <p class="card-body">Monoculture <em>Eucalyptus</em> and <em>Pinus</em> plantations have caused groundwater depletion in Ethiopia, Kenya, and South Africa measurable within 5 years of establishment. <em>Prosopis juliflora</em>, introduced for Sahel greening, has become an invasive species threatening pastoralist livelihoods across 9 countries. Species selection requires mandatory pre-deployment ecological assessment frameworks.</p>
+        <span class="card-tag">⚠ Risk Alert</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     6. POLICY FRAMEWORKS
+============================================================================= -->
+<div id="policy" class="band band--cream">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 06 · Policy Architecture</span>
+      <h2 class="section-title">Regenerative Policy Frameworks &amp; Empowerment Scrolls</h2>
+      <p class="section-lead">
+        Translating atmospheric science into durable governance instruments.
+        These frameworks are designed as meta-prompt chains — structured
+        analytical sequences that guide ministerial teams through systems-level
+        problem formulation rather than linear policy prescription.
+      </p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div>
+        <h3 style="margin-bottom:16px;font-size:1.1rem;">Policy Cascade Framework 1 — Land Tenure as Atmospheric Policy</h3>
+        <div class="collapse-group">
+          <details class="collapse-item">
+            <summary>Premise: Why tenure reform is a rainfall intervention</summary>
+            <div class="collapse-body">
+              <p>Where farmers lack secure tenure over land and trees, the rational economic incentive is to extract rather than invest. FMNR and agroforestry adoption rates are 3–5x higher in communities with documented community forest rights. The most cost-effective national rainfall restoration programme available to any African government is a national land tenure reform programme that secures community tree ownership — not a tree-planting programme.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Instrument 1A — Community Forest Carbon Tenure</summary>
+            <div class="collapse-body">
+              <p>Governments can issue legally-binding community carbon tenure certificates that give communities the right to generate, verify, and sell carbon credits from their restored forests. Ghana's REDD+ Forest Carbon Partnership and Tanzania's Village Land Forest Reserve system provide implementation models. The critical design element is that carbon rights must be nested within land rights — not substituted for them.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Instrument 1B — Payment for Ecosystem Services (PES) Cascades</summary>
+            <div class="collapse-body">
+              <p>Costa Rica's PES programme increased forest cover from 21% to 54% in 30 years through direct government payment to landholders for forest maintenance. Applied at African scale, a continental PES fund calibrated to watershed service values could generate positive returns for downstream water infrastructure budgets — replacing dam construction expenditure with catchment restoration investment at lower cost and with superior hydrological outcomes.</p>
+            </div>
+          </details>
+        </div>
+
+        <h3 style="margin:28px 0 16px;font-size:1.1rem;">Policy Cascade Framework 2 — Carbon Finance for Atmospheric Restoration</h3>
+        <div class="collapse-group">
+          <details class="collapse-item">
+            <summary>Article 6 Mechanisms &amp; African Carbon Markets</summary>
+            <div class="collapse-body">
+              <p>The Nairobi Declaration (2023) and the African Carbon Markets Initiative (ACMI) target generating 1.5 billion tonnes of CO₂ credits by 2030 and mobilising $6 billion annually. The critical governance risk is that carbon market design without primary community rights creates a new form of green extraction — revenues captured by intermediaries while communities bear displacement costs. This platform advocates for Article 6 frameworks that embed Free, Prior, and Informed Consent (FPIC), community revenue-share floors of &gt;50%, and additionality verification systems immune to fraudulent baseline manipulation.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Biodiversity Credits as Complementary Instrument</summary>
+            <div class="collapse-body">
+              <p>The Kunming-Montreal Global Biodiversity Framework commits signatories to 30×30 protection targets. Several African nations are pioneering biodiversity credit instruments as a complement to carbon credits — with separate payments for species richness, pollinator diversity, and ecosystem function metrics. These instruments, properly designed, reward the quality of restoration rather than merely the quantity of trees — aligning financial incentives with atmospheric function rather than tree-count metrics that have historically produced monoculture failures.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:16px;font-size:1.1rem;">Policy Cascade Framework 3 — Agriculture Transformation</h3>
+        <div class="collapse-group">
+          <details class="collapse-item">
+            <summary>Agroforestry as Agricultural Policy, Not Environmental Policy</summary>
+            <div class="collapse-body">
+              <p>The framing error in most national plans is treating agroforestry as an environmental supplement to conventional agriculture rather than as the productive system. Parkland agroforestry in the Sahel sustains yields in drought years when monocrops fail entirely — an agricultural insurance function not captured in standard yield data. Ministries of Agriculture, not Ministries of Environment, must own agroforestry policy — with extension service mandates, subsidy reorientation, and input supply chain development.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Soil Carbon as a National Balance Sheet Asset</summary>
+            <div class="collapse-body">
+              <p>France's "4 per 1000" initiative proposed that a 0.4% annual increase in soil organic carbon stocks globally would offset all anthropogenic CO₂ emissions. Applied to African agricultural soils, this represents both a climate mitigation strategy and a food security strategy — soils above 2% organic carbon retain water significantly more effectively, reducing drought-induced crop failure. A national soil carbon inventory system, combined with farm-level carbon payment programmes, creates a measurable, auditable restoration economy.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Regenerative Agriculture Standards &amp; Trade Linkage</summary>
+            <div class="collapse-body">
+              <p>The EU Deforestation Regulation (EUDR, 2024) creates supply chain liability for agricultural commodities linked to forest clearing. This creates a market mechanism: African producers who can certify forest-compatible production gain preferential EU market access. The policy opportunity is to translate EUDR compliance pressure into a national regenerative agriculture certification infrastructure that simultaneously serves atmospheric restoration, export market access, and farmer income objectives.</p>
+            </div>
+          </details>
+        </div>
+
+        <div class="callout callout--gold mt-24">
+          <div class="callout-label">Ministers' Action Prompt</div>
+          <p>Identify three leverage points in your national budget where existing expenditure (water infrastructure, agricultural subsidies, disaster relief) could be partially redirected to upstream restoration interventions that would reduce the long-term cost of those same expenditures. Cascade analysis shows this substitution typically produces 3:1 to 8:1 cost-benefit ratios within a 15-year fiscal horizon.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     7. INTERNATIONAL ENGAGEMENT
+============================================================================= -->
+<div id="international" class="band band--forest">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 07 · Global Partnerships</span>
+      <h2 class="section-title" style="color:var(--white);">International Engagement Portal</h2>
+      <p class="section-lead" style="color:rgba(255,255,255,0.75);">
+        Africa's atmospheric engine is a global public good. Countries outside the continent
+        have direct economic and climatic stakes in its restoration — and a growing suite of
+        mechanisms through which to engage as genuine partners rather than donors.
+        This section outlines roles for every region of the world.
+      </p>
+    </div>
+
+    <div class="callout callout--gold reveal">
+      <div class="callout-label">The Case for International Investment</div>
+      <p style="color:var(--ink);">
+        Peer-reviewed modelling indicates that large-scale African forest restoration would
+        reduce temperatures in the North Atlantic, alter monsoon patterns in South Asia, and
+        increase Mediterranean rainfall. African atmospheric restoration is not a
+        regional charity case — it is planetary climate infrastructure. Donor framing
+        must be replaced with infrastructure investment framing.
+      </p>
+    </div>
+
+    <h3 style="margin:40px 0 24px;font-size:1.15rem;color:var(--white);">Engagement Pathways by Nation-Type</h3>
+    <div class="grid-3 reveal">
+      <div class="country-card">
+        <span class="country-flag">🇪🇺</span>
+        <div class="country-body">
+          <div class="country-name">European Union</div>
+          <div class="country-role">Regulatory Anchor &amp; Finance Hub</div>
+          <p class="country-text">The EU is the primary regulatory lever through EUDR, the EU Taxonomy for Sustainable Finance, and Nature Restoration Law. Engagement pathway: (1) EUDR implementation support for African producer nations; (2) EIB / EBRD co-financing of restoration bond instruments; (3) Technical support for MRV (Measurement, Reporting, Verification) infrastructure; (4) Trade preference linkage to 30×30 biodiversity commitments.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇺🇸</span>
+        <div class="country-body">
+          <div class="country-name">United States</div>
+          <div class="country-role">Technology, Finance &amp; Science Partner</div>
+          <p class="country-text">USAID, Prosper Africa, MCC, and the newly expanded DFC provide capital instruments. NASA and NOAA provide world-leading satellite monitoring assets directly applicable to African ecosystem MRV. Engagement pathway: (1) SERVIR programme expansion for African forest monitoring; (2) DFC first-loss capital facilities for restoration bond issuance; (3) USAID food security programme reorientation toward agroforestry; (4) Voluntary carbon market standard-setting alignment.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇨🇳</span>
+        <div class="country-body">
+          <div class="country-name">China</div>
+          <div class="country-role">Infrastructure &amp; Restoration Technology</div>
+          <p class="country-text">China has the world's largest domestic afforestation programme (Grain for Green, 150M ha) and loess plateau restoration experience directly applicable to Sahel conditions. Engagement pathway: (1) South-South technology transfer of soil restoration methodologies; (2) Belt and Road Green Development Coalition instrument use; (3) Chinese voluntary carbon market integration with African credit supply; (4) Desertification control technology export.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇮🇳</span>
+        <div class="country-body">
+          <div class="country-name">India</div>
+          <div class="country-role">Dryland Restoration &amp; Community Models</div>
+          <p class="country-text">India's joint forest management programme and Watershed Development Programme have produced well-documented, community-driven restoration outcomes directly analogous to African dryland contexts. Engagement pathway: (1) South-South FMNR knowledge exchange; (2) NABARD financing model adaptation for African community development banks; (3) Space application (ISRO) for low-cost ecosystem monitoring; (4) G20 sustainable land management standard harmonisation.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇧🇷</span>
+        <div class="country-body">
+          <div class="country-name">Brazil</div>
+          <div class="country-role">Tropical Forest Science &amp; Policy</div>
+          <p class="country-text">Brazil's INPE provides world-leading tropical deforestation monitoring science. EMBRAPA's agroforestry research is directly transferable to Congo Basin contexts. Engagement pathway: (1) INPE-SERVIR African monitoring partnership; (2) Brazil-Congo Basin atmospheric cascade research consortium; (3) Payment for ecosystem services policy design exchange; (4) Tropical reforestation seed technology partnership.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇯🇵</span>
+        <div class="country-body">
+          <div class="country-name">Japan</div>
+          <div class="country-role">Technology, ODA &amp; Standards</div>
+          <p class="country-text">JICA is one of Africa's most active technical development partners. Japanese precision agriculture technology and remote sensing expertise are highly applicable. Engagement pathway: (1) JICA agroforestry technical assistance programme; (2) Green Innovation Fund technology transfer; (3) J-CREDIT mechanism linkage with African carbon markets; (4) JAXA earth observation data-sharing for forest monitoring.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇸🇦</span>
+        <div class="country-body">
+          <div class="country-name">Saudi Arabia &amp; Gulf States</div>
+          <div class="country-role">Sovereign Wealth &amp; Dryland Expertise</div>
+          <p class="country-text">Saudi Vision 2030's Green Saudi and Green Middle East initiatives represent the world's largest planned dryland afforestation programme — creating direct learning and partnership potential with Sahel restoration efforts. Engagement pathway: (1) Saudi Green Initiative knowledge exchange with Great Green Wall; (2) PIF sovereign wealth co-investment in African restoration bonds; (3) Shared desalination-agroforestry frontier technology; (4) Islamic development financing instrument application.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇬🇧</span>
+        <div class="country-body">
+          <div class="country-name">United Kingdom</div>
+          <div class="country-role">Finance Innovation &amp; Commonwealth Links</div>
+          <p class="country-text">The City of London's voluntary carbon market infrastructure and the UK's pioneering Ecosystem Services valuation frameworks (Dasgupta Review) position the UK as a natural framework architect. Engagement pathway: (1) British International Investment (BII) restoration fund co-investment; (2) Taskforce on Nature-related Financial Disclosures (TNFD) standard co-development with African nations; (3) Commonwealth Forest Carbon Partnership; (4) UK-Africa Natural Capital accounting framework.</p>
+        </div>
+      </div>
+      <div class="country-card">
+        <span class="country-flag">🇦🇺</span>
+        <div class="country-body">
+          <div class="country-name">Australia</div>
+          <div class="country-role">Dryland &amp; Indigenous Land Management</div>
+          <p class="country-text">Australia's Indigenous ranger programmes and savanna fire management carbon projects (Northern Australia) are directly applicable to African savanna and dryland contexts. Engagement pathway: (1) Indigenous carbon method peer exchange with African pastoralist communities; (2) CSIRO dryland restoration research partnership; (3) Australian carbon credit method development co-investment; (4) Northern Territory savanna management model exchange.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin:48px 0 24px;font-size:1.15rem;color:var(--white);">International Financing Instruments Available Now</h3>
+    <div class="data-table-wrap reveal">
+      <table class="data-table" aria-label="International financing instruments">
+        <thead>
+          <tr><th>Instrument</th><th>Institution</th><th>Scale</th><th>Application Area</th><th>Access Route</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Green Climate Fund (GCF)</td><td>UNFCCC</td><td>Up to $250M/project</td><td>Mitigation + Adaptation</td><td><span class="badge badge-green">Direct Access Available</span></td></tr>
+          <tr><td>Global Environment Facility (GEF)</td><td>World Bank Group</td><td>$5–50M typical</td><td>Biodiversity, Land Degradation</td><td><span class="badge badge-green">Direct Access Available</span></td></tr>
+          <tr><td>Adaptation Fund</td><td>UNFCCC</td><td>Up to $10M</td><td>Climate Adaptation</td><td><span class="badge badge-green">Direct Access</span></td></tr>
+          <tr><td>ACMI Carbon Markets</td><td>AGRA / Rockefeller</td><td>$6B by 2030</td><td>Forest and Soil Carbon</td><td><span class="badge badge-amber">Registry Required</span></td></tr>
+          <tr><td>GAFSP</td><td>World Bank</td><td>$50–100M</td><td>Agricultural Transformation</td><td><span class="badge badge-amber">Government Proposal</span></td></tr>
+          <tr><td>Article 6 ITMOs</td><td>Bilateral (Paris)</td><td>Variable</td><td>Nationally Determined Contributions</td><td><span class="badge badge-amber">Bilateral Agreement</span></td></tr>
+          <tr><td>Nature Performance Bonds</td><td>IFC / EBRD</td><td>$100–500M</td><td>Sovereign Restoration Debt</td><td><span class="badge badge-blue">In Development</span></td></tr>
+          <tr><td>Biodiversity Credits (VCM)</td><td>Various</td><td>Pilot scale</td><td>Ecosystem function metrics</td><td><span class="badge badge-blue">Emerging</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout--gold mt-40 reveal">
+      <div class="callout-label">How to Engage as a Non-African Nation — Five Entry Points</div>
+      <ol style="margin-top:12px;padding-left:20px;line-height:2;">
+        <li><strong>Science Partnership</strong> — Co-fund atmospheric cascade monitoring infrastructure via existing bilateral science agreements.</li>
+        <li><strong>Carbon Market Integration</strong> — Connect your national or voluntary carbon market to African Article 6 credit supply with community rights safeguards embedded.</li>
+        <li><strong>Trade Linkage</strong> — Offer preferential market access for agricultural products certified under regenerative, forest-compatible production standards.</li>
+        <li><strong>Sovereign Finance</strong> — Co-invest in Nature Performance Bonds or blue/green bonds issued by African sovereigns with verified restoration milestones.</li>
+        <li><strong>Technology Transfer</strong> — Provide no-cost access to satellite monitoring data, soil analysis tools, seed bank libraries, and restoration modelling software.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     8. GOVERNANCE & FINANCING
+============================================================================= -->
+<div id="governance" class="band band--cream">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 08 · Institutional Architecture</span>
+      <h2 class="section-title">Governance Frameworks &amp; Financing Mechanisms</h2>
+      <p class="section-lead">
+        Continental-scale restoration requires governance architectures that span
+        sovereign boundaries, integrate indigenous rights, and produce financing structures
+        capable of sustaining 50-year investment horizons. This section examines the
+        institutional models and their precedents.
+      </p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div>
+        <h3 style="margin-bottom:20px;font-size:1.1rem;">Proposed Governance Frameworks</h3>
+        <div class="collapse-group">
+          <details class="collapse-item">
+            <summary>African Atmospheric Commons Treaty</summary>
+            <div class="collapse-body">
+              <p>A proposed supranational legal instrument that establishes transboundary ecosystem services as shared sovereign assets — creating both rights and obligations between nations whose atmospheres are coupled. Modelled on the Antarctic Treaty System and the Arctic Council, but with enforceable payment mechanisms. Upwind nations that maintain forest cover have a legally recognised claim on payments from downwind beneficiary nations — operationalising the atmospheric cascade in international law.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Continental Restoration Investment Authority (CRIA)</summary>
+            <div class="collapse-body">
+              <p>An African Union body with a mandate to aggregate, verify, and distribute multilateral restoration financing to national and community actors. Modelled on the African Development Bank's infrastructure mandate but with ecological performance metrics rather than engineering deliverables. Would issue continental green bonds backed by verified ecosystem service flows — enabling institutional investors to deploy at scale without navigating 54 separate national approval processes.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Indigenous &amp; Community Land Rights Architecture</summary>
+            <div class="collapse-body">
+              <p>Any continental governance architecture must be built on, not around, community land rights. The empirical literature consistently demonstrates that community-managed forests have lower deforestation rates than state or private forests — by 20–50% in comparative studies. ILO Convention 169 and the UN Declaration on the Rights of Indigenous Peoples provide the legal scaffolding. The governance imperative is to operationalise these instruments in national law before carbon market pressures create perverse incentives for land consolidation.</p>
+            </div>
+          </details>
+          <details class="collapse-item">
+            <summary>Transboundary Ecological Corridor Commission</summary>
+            <div class="collapse-body">
+              <p>Fourteen transboundary wildlife conservation areas already exist across Africa. Their governance infrastructure can be extended to atmospheric cascade corridor management — designating biotic pump corridors as shared natural infrastructure analogous to international waterways, with equivalent legal protections and co-management obligations.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:20px;font-size:1.1rem;">Financing Instruments for Restoration at Scale</h3>
+        <div class="grid-2" style="gap:16px;">
+          <div class="card" style="padding:18px;">
+            <h4 style="font-size:0.9rem;margin-bottom:8px;" class="text-gold">Restoration Bonds</h4>
+            <p class="card-body" style="font-size:0.82rem;">Sovereign or sub-sovereign debt instruments with coupon rates linked to independently verified ecosystem service delivery milestones. Seychelles and Barbados debt-for-nature swaps provide precedent. Scale: $100M–$5B per issuance.</p>
+          </div>
+          <div class="card" style="padding:18px;">
+            <h4 style="font-size:0.9rem;margin-bottom:8px;" class="text-gold">Blended Finance Facilities</h4>
+            <p class="card-body" style="font-size:0.82rem;">First-loss capital from multilateral development banks de-risks private investment in restoration enterprises. Catalyses 4:1 to 10:1 private capital leverage ratios for certified restoration projects.</p>
+          </div>
+          <div class="card" style="padding:18px;">
+            <h4 style="font-size:0.9rem;margin-bottom:8px;" class="text-gold">Carbon Revenue Trusts</h4>
+            <p class="card-body" style="font-size:0.82rem;">National trusts distributing verified carbon revenues directly to community landholders. Avoids capture by national budget cycles and ensures restoration incentive alignment at the household level.</p>
+          </div>
+          <div class="card" style="padding:18px;">
+            <h4 style="font-size:0.9rem;margin-bottom:8px;" class="text-gold">Parametric Insurance</h4>
+            <p class="card-body" style="font-size:0.82rem;">Satellite-triggered payouts when vegetation indices fall below restoration targets — replacing drought relief with proactive maintenance incentives. African Risk Capacity (ARC) provides the operational infrastructure.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     9. STUDENT MISSION LAB / GAMIFICATION
+============================================================================= -->
+<div id="missions" class="band band--dark">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 09 · Learning Missions</span>
+      <h2 class="section-title" style="color:var(--white);">Policy Design Simulation Laboratory</h2>
+      <p class="section-lead" style="color:rgba(255,255,255,0.75);">
+        Structured policy design challenges for ministerial teams, graduate researchers,
+        and university programmes. Each mission has defined constraints, stakeholder
+        maps, and evaluation rubrics. Completing a mission awards Restoration Points
+        in your HUD profile.
+      </p>
+    </div>
+    <div class="grid-3 reveal">
+      <div class="card card--dark">
+        <span class="card-num">MISSION 01</span>
+        <h3 class="card-title" style="color:var(--white);">Design a Transboundary Forest Carbon Agreement</h3>
+        <p class="card-body">
+          <strong>Scenario:</strong> Upwind forest nation losing forest cover due to agricultural expansion pressure from smallholders. Downwind nation experiencing measurable rainfall decline. Design a bilateral PES agreement with community rights safeguards.
+          <br><br><strong>Constraints:</strong> Limited verification budget; communities hold legal tenure; neither government has ratified ILO 169.
+          <br><br><strong>Rubric:</strong> Rights protection, additionality verification, community revenue share, political durability, financing mechanism.
+        </p>
+        <button class="btn-primary mt-16" style="font-size:0.78rem;padding:9px 18px;" onclick="completeM(1)" aria-label="Mark mission 1 complete">Mark Complete (+150 RP)</button>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">MISSION 02</span>
+        <h3 class="card-title" style="color:var(--white);">Model a National Soil Carbon Economy</h3>
+        <p class="card-body">
+          <strong>Scenario:</strong> A Sahel nation wishes to build a national programme that pays farmers for measured soil carbon increases through a combination of REDD+, GCF, and voluntary market revenues.
+          <br><br><strong>Constraints:</strong> No national MRV infrastructure; 85% smallholder farming; low mobile banking penetration.
+          <br><br><strong>Rubric:</strong> MRV system design, payment delivery mechanism, additionality baseline method, farmer uptake incentive, international buyer linkage.
+        </p>
+        <button class="btn-primary mt-16" style="font-size:0.78rem;padding:9px 18px;" onclick="completeM(2)" aria-label="Mark mission 2 complete">Mark Complete (+200 RP)</button>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">MISSION 03</span>
+        <h3 class="card-title" style="color:var(--white);">Restore a Degraded Highland Watershed</h3>
+        <p class="card-body">
+          <strong>Scenario:</strong> An East African highland watershed supplying a capital city's water has seen 40% forest loss over 30 years. River baseflow has dropped 35% and water treatment costs have doubled.
+          <br><br><strong>Constraints:</strong> Agricultural communities depend on cleared land; resettlement is politically infeasible; municipal water utility is technically insolvent.
+          <br><br><strong>Rubric:</strong> Agroforestry system design, tenure solution, utility funding model, 10-year restoration trajectory, community co-governance structure.
+        </p>
+        <button class="btn-primary mt-16" style="font-size:0.78rem;padding:9px 18px;" onclick="completeM(3)" aria-label="Mark mission 3 complete">Mark Complete (+250 RP)</button>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">MISSION 04</span>
+        <h3 class="card-title" style="color:var(--white);">Structure an International Restoration Partnership</h3>
+        <p class="card-body">
+          <strong>Scenario:</strong> A West African government is approached by three international partners — a European carbon fund, a Gulf sovereign wealth fund, and a Chinese technical assistance programme — each with different objectives. Design a multi-party partnership that serves national atmospheric restoration goals without creating dependency, sovereignty risk, or community displacement.
+          <br><br><strong>Rubric:</strong> National interest protection, FPIC safeguards, additionality, conflict-of-interest management.
+        </p>
+        <button class="btn-primary mt-16" style="font-size:0.78rem;padding:9px 18px;" onclick="completeM(4)" aria-label="Mark mission 4 complete">Mark Complete (+300 RP)</button>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">MISSION 05</span>
+        <h3 class="card-title" style="color:var(--white);">Design an Urban Atmospheric Resilience Plan</h3>
+        <p class="card-body">
+          <strong>Scenario:</strong> An African megacity of 10 million is experiencing worsening heat islands (+2.8°C above regional baseline), increased flood intensity (50-year events now occurring every 8 years), and air quality degradation. Design a landscape-scale urban cooling and flood management strategy.
+          <br><br><strong>Rubric:</strong> Species selection rationale, cooling effect modelling, flood attenuation design, co-benefit analysis, financing mechanism.
+        </p>
+        <button class="btn-primary mt-16" style="font-size:0.78rem;padding:9px 18px;" onclick="completeM(5)" aria-label="Mark mission 5 complete">Mark Complete (+200 RP)</button>
+      </div>
+      <div class="card card--dark">
+        <span class="card-num">MISSION 06</span>
+        <h3 class="card-title" style="color:var(--white);">Draft a Continental Atmospheric Commons Treaty</h3>
+        <p class="card-body">
+          <strong>Scenario:</strong> You are advising the African Union Commission on drafting the first international treaty that treats continental evapotranspiration as a shared sovereign resource.
+          <br><br><strong>Constraints:</strong> Must be ratifiable under current AU legal architecture; must not override existing bilateral water agreements; must include enforcement mechanisms that don't require external arbitration.
+          <br><br><strong>Rubric:</strong> Legal precedent, enforcement mechanism, benefit-sharing formula, compliance incentives.
+        </p>
+        <button class="btn-primary mt-16" style="font-size:0.78rem;padding:9px 18px;" onclick="completeM(6)" aria-label="Mark mission 6 complete">Mark Complete (+500 RP)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     10. RESEARCH BASE
+============================================================================= -->
+<div id="research" class="band band--sand">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 10 · Evidence Base</span>
+      <h2 class="section-title">Research Architecture &amp; Evidence Streams</h2>
+      <p class="section-lead">
+        The empirical foundation for policy decisions. Key research programmes,
+        datasets, and institutional knowledge streams organised by decision-relevance
+        for national government and multilateral institutions.
+      </p>
+    </div>
+
+    <div class="grid-3 reveal">
+      <div class="card">
+        <span class="card-num">10.A</span>
+        <h3 class="card-title">Atmospheric &amp; Climate Modelling</h3>
+        <p class="card-body">World-leading research on African atmospheric dynamics is produced by IGAD Climate Prediction &amp; Applications Centre (ICPAC), ACMAD, the UK Met Office African climate programme, ECMWF, and CMIP6 African model ensembles. Key open-access datasets: ERA5 reanalysis, CHIRPS precipitation, MODIS vegetation indices, and ESA CCI Land Cover.</p>
+        <span class="card-tag">Data Science</span>
+      </div>
+      <div class="card">
+        <span class="card-num">10.B</span>
+        <h3 class="card-title">Restoration Ecology Evidence</h3>
+        <p class="card-body">The Restoration Ecology journal, Society for Ecological Restoration databases, and CIFOR-ICRAF's evidence portal systematise what works and at what scale. Critical synthesis: Bastin et al. (2019, Science) mapping global reforestation potential; Lewis et al. (2019, Nature) correcting for species selection errors; and the WRI Restoration Opportunities Assessment Methodology (ROAM) operational toolkit.</p>
+        <span class="card-tag">Evidence Synthesis</span>
+      </div>
+      <div class="card">
+        <span class="card-num">10.C</span>
+        <h3 class="card-title">Political Economy Research</h3>
+        <p class="card-body">The most important under-researched dimension of restoration policy. Key programmes: ODI (London), IIED land tenure work, Rights and Resources Initiative forest governance research, and the Accountability Counsel's case documentation of community rights violations in carbon markets. Policy decisions made without political economy analysis fail at implementation — regardless of ecological soundness.</p>
+        <span class="card-tag">Governance Science</span>
+      </div>
+    </div>
+
+    <div class="mt-40 reveal">
+      <h3 style="margin-bottom:20px;font-size:1.1rem;">Key Research Gaps Requiring Urgent Attention</h3>
+      <div class="grid-2" style="gap:16px;">
+        <div class="callout">
+          <div class="callout-label">Gap 1 — Atmospheric Cascade Threshold Quantification</div>
+          <p>We lack precise, biome-specific thresholds for vegetation cover below which biotic pump function degrades non-linearly. Knowing these thresholds with 95% confidence intervals would transform restoration prioritisation from qualitative judgement to engineering-grade infrastructure planning.</p>
+        </div>
+        <div class="callout">
+          <div class="callout-label">Gap 2 — Political Economy of Land Tenure Reform</div>
+          <p>Comparative analysis of which institutional conditions make land tenure reform politically feasible, at what speed, with which stakeholder configurations — is dramatically under-researched relative to its importance as the central bottleneck to restoration at scale.</p>
+        </div>
+        <div class="callout">
+          <div class="callout-label">Gap 3 — Indigenous Knowledge System Integration</div>
+          <p>Systematic documentation, validation against biophysical monitoring, and legal protection of traditional ecological knowledge across African cultural systems is fragmented and under-resourced. This knowledge represents millennia of accumulated landscape management intelligence.</p>
+        </div>
+        <div class="callout">
+          <div class="callout-label">Gap 4 — Atmospheric Teleconnection Mapping</div>
+          <p>Precise attribution of which African forest loss events trigger measurable rainfall reductions in which specific regions — quantified at seasonal and annual timescales — would create the empirical basis for transboundary PES pricing and legal liability frameworks.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     11. HORIZONS / QUESTIONS ENGINE
+============================================================================= -->
+<div id="questions" class="band band--dark">
+  <div class="page-body">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Section 11 · Expansion Engine</span>
+      <h2 class="section-title" style="color:var(--white);">Questions at the Knowledge Frontier</h2>
+      <p class="section-lead" style="color:rgba(255,255,255,0.75);">
+        The most important questions for the next generation of atmospheric restoration
+        policy research. These represent the boundaries of current institutional knowledge
+        — and the investment theses for the next decade of research funding.
+      </p>
+    </div>
+    <div class="grid-2 reveal">
+      <div class="collapse-group">
+        <details class="collapse-item collapse-item--dark" style="color:var(--white);">
+          <summary style="color:var(--white);">At what forest cover threshold does the Congo Basin biotic pump fail irreversibly?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">Current modelling suggests 70–80% intact canopy is required for sustained pump function, but the irreversibility threshold — below which natural recovery without active restoration becomes implausible — has not been empirically determined at basin scale. This is arguably the most consequential unanswered question in African climate science.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">Can artificial intelligence accelerate FMNR mapping and community income verification?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">Satellite + ML systems can now detect individual tree crown cover changes at &lt;1m resolution. The question is whether this can be packaged into community-accessible, government-auditable MRV infrastructure at a per-hectare cost below $2 — making continental carbon credit verification financially viable without excluding smallholder communities.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">How do urban forest networks interact with regional atmospheric moisture cycles?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">African cities are growing faster than any region on Earth. Whether urban green infrastructure in megacities like Lagos, Kinshasa, Cairo, and Nairobi can meaningfully participate in regional atmospheric regulation — or merely provide local cooling — remains under-researched but has enormous policy implications for urban planning mandates.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">What governance structures make transboundary ecosystem treaties politically durable?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">International environmental agreements have poor enforcement records, particularly when parties' economic interests diverge. What institutional designs — benefit-sharing formulas, monitoring authorities, graduated compliance mechanisms — produce treaties that hold under political transition, economic pressure, and inter-state conflict? African restoration governance research must engage this question directly.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">Can atmospheric restoration be financed entirely from its own ecosystem service outputs?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">The hypothesis is that the water security, carbon sequestration, biodiversity, agricultural yield, and disaster risk reduction benefits of large-scale restoration, properly monetised, exceed total restoration costs within a 15-year window — creating a self-financing system after initial capitalisation. The modelling evidence is encouraging; the institutional architecture to capture and distribute these returns does not yet exist.</div>
+        </details>
+      </div>
+      <div class="collapse-group">
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">Which overlooked micro-organisms are keystone actors in soil atmospheric coupling?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">Mycorrhizal networks, nitrogen-fixing bacteria, and methanotrophs play well-documented roles in soil function. But African soil microbiome research is dramatically under-resourced compared to temperate zone equivalents. Unknown keystone microbial actors may be determining restoration success or failure in ways we cannot currently diagnose — making soil microbiome sequencing a policy-relevant research investment.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">How do post-conflict land rights vacuums affect restoration window politics?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">Several of Africa's highest-priority restoration zones — Eastern DRC, South Sudan, parts of Mali and CAR — are in or adjacent to conflict zones. Land tenure vacuums created by displacement can paradoxically create political windows for tenure reform — or can enable green-grabbing by outside investors. Research on conflict-to-restoration transition governance is nearly absent from the literature.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">What would continent-scale atmospheric restoration mean for Mediterranean and European climate systems?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">Saharan dust aerosols suppress North Atlantic hurricane formation and fertilise the Amazon. Sahel greening would alter dust flux. Large-scale Congo Basin reforestation would affect West African monsoon timing and strength — with measurable knock-on effects on Southern European rainfall and North Atlantic storm tracks. The global atmospheric teleconnections of large-scale African restoration have not been comprehensively modelled.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">How can secondary school and university curricula build the next generation of atmospheric restoration scientists?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">Africa has the world's youngest and fastest-growing population. The scientists, engineers, and policymakers who will need to manage the continent's ecological systems for the next 50 years are currently in school. Curriculum design that builds atmospheric science literacy, ecological economics, and governance frameworks from secondary level — particularly in the nations with greatest restoration leverage — is an investment with asymmetric long-term returns.</div>
+        </details>
+        <details class="collapse-item collapse-item--dark">
+          <summary style="color:var(--white);">How might regional security frameworks evolve to include atmospheric stability mandates?</summary>
+          <div class="collapse-body" style="color:rgba(255,255,255,0.8);">The African Peace and Security Architecture (APSA) addresses conventional security threats. There is no mechanism by which atmospheric destabilisation — measurable, attributable to specific land-use decisions in specific nations — triggers any equivalent response. As the science of atmospheric teleconnection improves, the case for APSA or AU mechanisms that classify catastrophic ecosystem deforestation as a regional security threat becomes legally and diplomatically constructable.</div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- =============================================================================
+     FOOTER
+============================================================================= -->
+<footer style="background:var(--ink);color:rgba(255,255,255,0.7);padding:60px 0 32px;">
+  <div class="page-body">
+    <div class="grid-3" style="margin-bottom:48px;">
+      <div>
+        <h4 style="color:var(--gold);font-family:var(--font-ui);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px;">Platform</h4>
+        <p style="font-size:0.82rem;line-height:1.7;">Africa Atmospheric Cascade Initiative — v3.0. A PhD-level policy intelligence platform for governments, multilateral institutions, and international partners engaged in continental atmospheric restoration.</p>
+      </div>
+      <div>
+        <h4 style="color:var(--gold);font-family:var(--font-ui);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px;">Attributions &amp; Licensing</h4>
+        <p style="font-size:0.8rem;line-height:1.8;">
+          Platform design: Foster + Navi / Planetary Restoration Archive<br>
+          License: CC BY 4.0 International<br>
+          Architecture: ZeroStorm — zero external dependencies, zero tracking<br>
+          Repository: github.com/therickyfoster<br>
+          Scientific basis: Makarieva &amp; Gorshkov (Biotic Pump); IPCC AR6 Ch. 11; CIFOR-ICRAF evidence portal; WRI ROAM methodology. All data sources cited within sections. No content is reproduced verbatim from proprietary sources.
+        </p>
+      </div>
+      <div>
+        <h4 style="color:var(--gold);font-family:var(--font-ui);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px;">Zero-Harm Declaration</h4>
+        <div style="background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.2);border-radius:var(--radius);padding:14px;font-size:0.8rem;line-height:1.7;">
+          <strong style="color:var(--gold-lt);">Zero-Harm:</strong> This platform exists solely to support ecological and atmospheric restoration. No content may be used for displacement, extraction, surveillance, or coercive land acquisition.<br><br>
+          <strong style="color:var(--gold-lt);">Anti-Inversion:</strong> Any application of this platform's content that harms the communities or ecosystems it purports to restore constitutes a direct inversion of its purpose and must be treated as a misuse.
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center;">
+      <p style="font-size:0.76rem;font-family:var(--font-ui);">© 2026 Foster + Navi · Planetary Restoration Archive · CC BY 4.0</p>
+      <p style="font-size:0.72rem;font-family:var(--font-mono);color:rgba(255,255,255,0.3);">ZeroStorm · No cookies · No telemetry · No external calls · All storage local-only</p>
+      <button class="hud-btn" onclick="openSettings()" style="font-size:0.72rem;" aria-label="Open settings to reset data">⚙ Privacy &amp; Data Settings</button>
+    </div>
+  </div>
+</footer>
+
+<!-- =============================================================================
+     GAMIFICATION HUD
+     Tracks sections visited and missions completed via IndexedDB.
+     Collapsed state saved locally. Reset button wipes all local data.
+============================================================================= -->
+<div id="hud" role="complementary" aria-label="Progress HUD">
+  <button id="hud-toggle" onclick="toggleHUD()" aria-label="Toggle HUD">−</button>
+  <div id="hud-body">
+    <div class="hud-title">
+      <span class="hud-title-dot"></span>
+      Restoration HUD
+    </div>
+    <span class="hud-level-badge" id="hud-level">Analyst</span>
+    <div class="hud-row">
+      <span>Sections explored</span>
+      <span class="hud-val" id="hud-sections">0/11</span>
+    </div>
+    <div class="hud-row">
+      <span>Missions complete</span>
+      <span class="hud-val" id="hud-missions">0/6</span>
+    </div>
+    <div class="hud-row">
+      <span>Restoration Points</span>
+      <span class="hud-val" id="hud-rp">0 RP</span>
+    </div>
+    <div class="hud-bar-wrap" role="progressbar" aria-label="Progress to next level" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+      <div class="hud-bar" id="hud-bar"></div>
+    </div>
+    <div class="hud-actions">
+      <button class="hud-btn" onclick="openSettings()" aria-label="Open settings">⚙ Settings</button>
+      <button class="hud-btn" onclick="resetAllData()" aria-label="Reset all local data">↺ Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================================
+     CONSTELLATION VISUALIZER
+     SVG canvas showing section nodes. Visited = bright gold; unvisited = dim.
+     Edges drawn between adjacent sections. Redrawn on scroll events.
+============================================================================= -->
+<div id="constellation-panel" role="complementary" aria-label="Section map constellation">
+  <canvas id="constellation-canvas" width="140" height="140" aria-hidden="true"></canvas>
+  <div class="constellation-label">Section Map</div>
+</div>
+
+<!-- =============================================================================
+     SETTINGS PANEL
+     All preferences stored in IndexedDB. No external communication ever occurs.
+============================================================================= -->
+<div id="settings-panel" role="dialog" aria-modal="true" aria-label="Settings panel" aria-hidden="true">
+  <button class="settings-close" onclick="closeSettings()" aria-label="Close settings">✕</button>
+  <div class="settings-title">⚙ Platform Settings &amp; Privacy</div>
+
+  <div class="settings-group">
+    <span class="settings-label">Interface</span>
+    <div class="settings-row">
+      <span>Show HUD</span>
+      <button class="toggle-switch on" id="toggle-hud" onclick="togglePref('showHUD')" aria-label="Toggle HUD visibility"></button>
+    </div>
+    <div class="settings-row">
+      <span>Show Constellation</span>
+      <button class="toggle-switch on" id="toggle-const" onclick="togglePref('showConst')" aria-label="Toggle constellation visibility"></button>
+    </div>
+    <div class="settings-row">
+      <span>Parallax Effects</span>
+      <button class="toggle-switch on" id="toggle-parallax" onclick="togglePref('parallax')" aria-label="Toggle parallax effects"></button>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <span class="settings-label">Data &amp; Privacy</span>
+    <p class="settings-note">All data is stored locally in your browser's IndexedDB. Nothing is ever sent externally. You have full control over all stored data.</p>
+    <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
+      <button class="danger-btn" onclick="resetProgress()">↺ Reset progress &amp; points only</button>
+      <button class="danger-btn" onclick="resetAllData()">⊗ Wipe all local data completely</button>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <span class="settings-label">What is stored?</span>
+    <p class="settings-note">Visited sections, completed missions, restoration points, HUD state, and interface preferences. No personal identifiers. No usage analytics. No cookies. All deletable instantly.</p>
+  </div>
+</div>
+
+<!-- =============================================================================
+     JAVASCRIPT
+     Sections: (A) IndexedDB, (B) Splash, (C) Nav, (D) Parallax, (E) Search,
+     (F) HUD, (G) Constellation, (H) Scroll Reveal, (I) Settings, (J) Missions
+============================================================================= -->
+<script>
+// =============================================================================
+// (A) INDEXEDDB — All persistent state. No cookies, no localStorage.
+// Stores: progress (sections/missions/RP), preferences.
+// To add a new data type: add a key to the DB_KEYS object and use db.put/db.get.
+// =============================================================================
+const DB_NAME   = 'AACI_v3';
+const DB_VER    = 1;
+const STORE     = 'state';
+let db          = null;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore(STORE, { keyPath: 'key' });
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror   = e => { console.warn('IndexedDB unavailable, using in-memory fallback.'); res(null); };
+  });
+}
+
+// In-memory fallback if IndexedDB is unavailable
+const memStore = {};
+
+function dbGet(key) {
+  if (!db) return Promise.resolve(memStore[key] ?? null);
+  return new Promise(res => {
+    const tx  = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).get(key);
+    req.onsuccess = () => res(req.result ? req.result.val : null);
+    req.onerror   = () => res(null);
+  });
+}
+function dbSet(key, val) {
+  if (!db) { memStore[key] = val; return Promise.resolve(); }
+  return new Promise(res => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put({ key, val });
+    tx.oncomplete = res;
+  });
+}
+function dbClearAll() {
+  memStore && Object.keys(memStore).forEach(k => delete memStore[k]);
+  if (!db) return Promise.resolve();
+  return new Promise(res => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).clear();
+    tx.oncomplete = res;
+  });
+}
+
+// =============================================================================
+// STATE — Centralised application state object
+// =============================================================================
+const STATE = {
+  sectionsVisited : new Set(),
+  missionsComplete: new Set(),
+  rp              : 0,
+  prefs           : { showHUD: true, showConst: true, parallax: true },
+  hudCollapsed    : false
+};
+const TOTAL_SECTIONS = 11;
+const TOTAL_MISSIONS = 6;
+const LEVELS = [
+  { name:'Observer',   min:0    },
+  { name:'Analyst',    min:100  },
+  { name:'Researcher', min:400  },
+  { name:'Strategist', min:900  },
+  { name:'Architect',  min:1600 },
+  { name:'Steward',    min:2500 },
+];
+
+// Map section IDs to section numbers for progress tracking
+const SECTION_IDS = [
+  'executive','science','ecosystems','topography','species',
+  'policy','international','governance','missions','research','questions'
+];
+
+// =============================================================================
+// (B) SPLASH SCREEN
+// Animated star-field on the splash canvas. Dismissed after 2.2s.
+// IndexedDB stores 'seenSplash'. On second visit, splash shown briefly then
+// dismissed immediately after canvas draws.
+// =============================================================================
+let splashCanvas, splashCtx, splashStars = [];
+function initSplash() {
+  splashCanvas = document.getElementById('splash-canvas');
+  splashCtx    = splashCanvas.getContext('2d');
+  resizeSplashCanvas();
+  for (let i = 0; i < 180; i++) {
+    splashStars.push({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() * 1.5 + 0.3,
+      speed: Math.random() * 0.0003 + 0.00008,
+      opacity: Math.random() * 0.6 + 0.2
+    });
+  }
+  animateSplash();
+}
+function resizeSplashCanvas() {
+  splashCanvas.width  = window.innerWidth;
+  splashCanvas.height = window.innerHeight;
+}
+function animateSplash() {
+  if (!splashCtx) return;
+  const W = splashCanvas.width, H = splashCanvas.height;
+  splashCtx.clearRect(0, 0, W, H);
+  splashStars.forEach(s => {
+    s.x += s.speed;
+    if (s.x > 1) s.x = 0;
+    splashCtx.beginPath();
+    splashCtx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+    splashCtx.fillStyle = `rgba(201,162,39,${s.opacity})`;
+    splashCtx.fill();
+  });
+  if (!document.getElementById('splash').classList.contains('hidden')) {
+    requestAnimationFrame(animateSplash);
+  }
+}
+function dismissSplash() {
+  const el = document.getElementById('splash');
+  el.classList.add('hidden');
+  dbSet('seenSplash', true);
+}
+
+// =============================================================================
+// (C) NAVIGATION — Hide-on-scroll, active section highlighting
+// =============================================================================
+let lastScrollY = 0;
+let navHidden   = false;
+const topnav    = document.getElementById('topnav');
+const navLinks  = document.querySelectorAll('.nav-link');
+
+function updateNav() {
+  const y = window.scrollY;
+  // Hide/show on scroll direction
+  if (y > lastScrollY + 8 && y > 80) {
+    if (!navHidden) { topnav.classList.add('hidden'); navHidden = true; }
+  } else if (y < lastScrollY - 5) {
+    if (navHidden) { topnav.classList.remove('hidden'); navHidden = false; }
+  }
+  lastScrollY = y;
+
+  // Active section highlighting
+  let current = '';
+  SECTION_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.getBoundingClientRect().top <= 120) current = id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+
+// =============================================================================
+// (D) PARALLAX — Multi-layer depth on hero section
+// Disabled if user prefers reduced motion or turns it off in settings.
+// =============================================================================
+function updateParallax() {
+  if (!STATE.prefs.parallax) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const y = window.scrollY;
+  document.querySelectorAll('[data-parallax]').forEach(el => {
+    const speed  = parseFloat(el.getAttribute('data-parallax'));
+    const offset = y * speed;
+    el.style.transform = `translateY(${offset}px)`;
+  });
+}
+
+// =============================================================================
+// (E) CLIENT-SIDE SEARCH — Full-text index built from DOM content.
+// Input sanitised (HTML stripped, length-limited). Debounced at 280ms.
+// =============================================================================
+let searchIndex = [];
+let searchTimer = null;
+const SEARCH_INPUT   = document.getElementById('nav-search');
+const SEARCH_RESULTS = document.getElementById('search-results');
+
+function buildSearchIndex() {
+  searchIndex = [];
+  SECTION_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const heading = el.querySelector('h2,h3') || {};
+    const sectionTitle = heading.textContent || id;
+    // Gather all text paragraphs within this section
+    el.querySelectorAll('p, li, td, .card-body, .collapse-body').forEach(node => {
+      const text = node.textContent.trim();
+      if (text.length > 40) {
+        searchIndex.push({ section: id, sectionTitle, text: text.substring(0, 300) });
+      }
+    });
+  });
+}
+
+function sanitiseQuery(q) {
+  // Strip HTML, control chars, limit length
+  return q.replace(/[<>\"\'&]/g, '').replace(/[\x00-\x1F]/g, '').trim().substring(0, 80);
+}
+
+function doSearch(rawQuery) {
+  const q = sanitiseQuery(rawQuery).toLowerCase();
+  if (q.length < 2) { closeSearch(); return; }
+  const results = [];
+  const seen = new Set();
+  for (const item of searchIndex) {
+    if (results.length >= 8) break;
+    const textLC = item.text.toLowerCase();
+    const idx    = textLC.indexOf(q);
+    if (idx === -1) continue;
+    const key = item.section + item.text.substring(0, 40);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const start   = Math.max(0, idx - 30);
+    const snippet = item.text.substring(start, start + 140);
+    const hi      = snippet.replace(new RegExp('(' + escRe(q) + ')', 'gi'),
+                      '<span class="sr-highlight">$1</span>');
+    results.push({ section: item.section, sectionTitle: item.sectionTitle, hi });
+  }
+  renderSearch(results, q);
+}
+
+function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function renderSearch(results, q) {
+  SEARCH_RESULTS.innerHTML = '';
+  if (results.length === 0) {
+    SEARCH_RESULTS.innerHTML = '<div class="no-results">No results for "' + sanitiseQuery(q) + '"</div>';
+  } else {
+    results.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'search-result-item';
+      div.setAttribute('role', 'option');
+      div.innerHTML = `<div class="sr-section">${r.sectionTitle}</div><div class="sr-text">…${r.hi}…</div>`;
+      div.addEventListener('click', () => {
+        const el = document.getElementById(r.section);
+        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        closeSearch();
+        SEARCH_INPUT.value = '';
+      });
+      SEARCH_RESULTS.appendChild(div);
+    });
+  }
+  SEARCH_RESULTS.classList.add('open');
+}
+function closeSearch() { SEARCH_RESULTS.classList.remove('open'); }
+
+SEARCH_INPUT.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  // Debounce: 280ms rate limit on search
+  searchTimer = setTimeout(() => doSearch(SEARCH_INPUT.value), 280);
+});
+SEARCH_INPUT.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
+document.addEventListener('click', e => {
+  if (!SEARCH_RESULTS.contains(e.target) && e.target !== SEARCH_INPUT) closeSearch();
+});
+
+// =============================================================================
+// (F) GAMIFICATION HUD — Tracks progress via IndexedDB, renders HUD state.
+// Points awarded for section visits (30 RP) and mission completions (variable).
+// Level determined by total RP against LEVELS thresholds.
+// =============================================================================
+const MISSION_RP = { 1:150, 2:200, 3:250, 4:300, 5:200, 6:500 };
+const SECTION_RP = 30;
+
+function getLevel(rp) {
+  let level = LEVELS[0];
+  for (const l of LEVELS) { if (rp >= l.min) level = l; }
+  return level;
+}
+function getNextLevel(rp) {
+  for (const l of LEVELS) { if (rp < l.min) return l; }
+  return null;
+}
+
+async function updateHUD() {
+  const sections  = STATE.sectionsVisited.size;
+  const missions  = STATE.missionsComplete.size;
+  const rp        = STATE.rp;
+  const level     = getLevel(rp);
+  const nextLevel = getNextLevel(rp);
+
+  document.getElementById('hud-sections').textContent = `${sections}/${TOTAL_SECTIONS}`;
+  document.getElementById('hud-missions').textContent = `${missions}/${TOTAL_MISSIONS}`;
+  document.getElementById('hud-rp').textContent       = `${rp} RP`;
+  document.getElementById('hud-level').textContent    = level.name;
+
+  const pct = nextLevel
+    ? Math.min(100, Math.round(((rp - level.min) / (nextLevel.min - level.min)) * 100))
+    : 100;
+  const bar = document.getElementById('hud-bar');
+  bar.style.width = pct + '%';
+  bar.closest('[role=progressbar]').setAttribute('aria-valuenow', pct);
+
+  await saveProgress();
+  drawConstellation();
+}
+
+async function saveProgress() {
+  await dbSet('sectionsVisited', [...STATE.sectionsVisited]);
+  await dbSet('missionsComplete', [...STATE.missionsComplete]);
+  await dbSet('rp', STATE.rp);
+}
+
+async function loadProgress() {
+  const sv = await dbGet('sectionsVisited');
+  const mc = await dbGet('missionsComplete');
+  const rp = await dbGet('rp');
+  if (sv) sv.forEach(s => STATE.sectionsVisited.add(s));
+  if (mc) mc.forEach(m => STATE.missionsComplete.add(m));
+  if (rp !== null) STATE.rp = rp;
+  updateHUD();
+}
+
+function awardSection(sectionId) {
+  if (STATE.sectionsVisited.has(sectionId)) return;
+  STATE.sectionsVisited.add(sectionId);
+  STATE.rp += SECTION_RP;
+  showToast(`+${SECTION_RP} RP — ${sectionId.charAt(0).toUpperCase()+sectionId.slice(1)} explored`);
+  updateHUD();
+}
+
+// Called by mission buttons
+window.completeM = function(n) {
+  if (STATE.missionsComplete.has(n)) { showToast('Mission already completed'); return; }
+  STATE.missionsComplete.add(n);
+  STATE.rp += MISSION_RP[n] || 100;
+  showToast(`✓ Mission ${n} complete · +${MISSION_RP[n]} RP`);
+  updateHUD();
+};
+
+function toggleHUD() {
+  const hud = document.getElementById('hud');
+  const btn = document.getElementById('hud-toggle');
+  STATE.hudCollapsed = !STATE.hudCollapsed;
+  hud.classList.toggle('collapsed', STATE.hudCollapsed);
+  btn.textContent = STATE.hudCollapsed ? '+' : '−';
+  dbSet('hudCollapsed', STATE.hudCollapsed);
+}
+
+// =============================================================================
+// (G) CONSTELLATION VISUALIZER
+// Draws section nodes in a circular arrangement. Visited nodes glow gold.
+// Edges connect adjacent sections. Redrawn whenever STATE changes.
+// =============================================================================
+const CONST_CANVAS = document.getElementById('constellation-canvas');
+const CONST_CTX    = CONST_CANVAS.getContext('2d');
+const CW = 140, CH = 140, CRAD = 52, CX = 70, CY = 70;
+
+function getNodePositions() {
+  return SECTION_IDS.map((id, i) => {
+    const angle = (i / SECTION_IDS.length) * Math.PI * 2 - Math.PI / 2;
+    return {
+      id,
+      x: CX + Math.cos(angle) * CRAD,
+      y: CY + Math.sin(angle) * CRAD
+    };
+  });
+}
+
+function drawConstellation() {
+  CONST_CTX.clearRect(0, 0, CW, CH);
+  const nodes = getNodePositions();
+
+  // Draw edges
+  CONST_CTX.strokeStyle = 'rgba(201,162,39,0.12)';
+  CONST_CTX.lineWidth   = 0.8;
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i], b = nodes[(i + 1) % nodes.length];
+    CONST_CTX.beginPath();
+    CONST_CTX.moveTo(a.x, a.y);
+    CONST_CTX.lineTo(b.x, b.y);
+    CONST_CTX.stroke();
+    // Cross-edges for visited neighbours
+    if (i < nodes.length - 2) {
+      const c = nodes[(i + 2) % nodes.length];
+      if (STATE.sectionsVisited.has(a.id) && STATE.sectionsVisited.has(c.id)) {
+        CONST_CTX.strokeStyle = 'rgba(201,162,39,0.07)';
+        CONST_CTX.beginPath();
+        CONST_CTX.moveTo(a.x, a.y);
+        CONST_CTX.lineTo(c.x, c.y);
+        CONST_CTX.stroke();
+        CONST_CTX.strokeStyle = 'rgba(201,162,39,0.12)';
+      }
+    }
+  }
+
+  // Draw nodes
+  nodes.forEach(({ id, x, y }) => {
+    const visited = STATE.sectionsVisited.has(id);
+    if (visited) {
+      // Glow
+      const grd = CONST_CTX.createRadialGradient(x, y, 0, x, y, 8);
+      grd.addColorStop(0, 'rgba(201,162,39,0.55)');
+      grd.addColorStop(1, 'rgba(201,162,39,0)');
+      CONST_CTX.fillStyle = grd;
+      CONST_CTX.beginPath();
+      CONST_CTX.arc(x, y, 8, 0, Math.PI * 2);
+      CONST_CTX.fill();
+    }
+    CONST_CTX.beginPath();
+    CONST_CTX.arc(x, y, visited ? 3.5 : 2, 0, Math.PI * 2);
+    CONST_CTX.fillStyle = visited ? '#c9a227' : 'rgba(255,255,255,0.2)';
+    CONST_CTX.fill();
+  });
+
+  // Centre dot
+  CONST_CTX.beginPath();
+  CONST_CTX.arc(CX, CY, 2, 0, Math.PI * 2);
+  CONST_CTX.fillStyle = 'rgba(201,162,39,0.4)';
+  CONST_CTX.fill();
+}
+
+// =============================================================================
+// (H) SCROLL REVEAL + SECTION TRACKER
+// IntersectionObserver reveals elements with class .reveal when they enter
+// viewport. Also awards HUD points for each section visited.
+// =============================================================================
+function initReveal() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+
+function initSectionTracker() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.15) {
+        const id = entry.target.id;
+        if (SECTION_IDS.includes(id)) awardSection(id);
+      }
+    });
+  }, { threshold: 0.15 });
+  SECTION_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) obs.observe(el);
+  });
+}
+
+// =============================================================================
+// (I) SETTINGS PANEL
+// =============================================================================
+window.openSettings  = function() {
+  const p = document.getElementById('settings-panel');
+  p.classList.add('open');
+  p.setAttribute('aria-hidden', 'false');
+  loadPrefsUI();
+};
+window.closeSettings = function() {
+  const p = document.getElementById('settings-panel');
+  p.classList.remove('open');
+  p.setAttribute('aria-hidden', 'true');
+};
+document.getElementById('settings-open-btn').addEventListener('click', openSettings);
+
+async function loadPrefsUI() {
+  const prefs = await dbGet('prefs') || STATE.prefs;
+  STATE.prefs = { ...STATE.prefs, ...prefs };
+  setToggle('toggle-hud',      STATE.prefs.showHUD);
+  setToggle('toggle-const',    STATE.prefs.showConst);
+  setToggle('toggle-parallax', STATE.prefs.parallax);
+  applyPrefs();
+}
+function setToggle(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('on', !!val);
+}
+window.togglePref = async function(key) {
+  STATE.prefs[key] = !STATE.prefs[key];
+  await dbSet('prefs', STATE.prefs);
+  loadPrefsUI();
+};
+function applyPrefs() {
+  document.getElementById('hud').style.display               = STATE.prefs.showHUD    ? '' : 'none';
+  document.getElementById('constellation-panel').style.display = STATE.prefs.showConst ? '' : 'none';
+}
+
+window.resetProgress = async function() {
+  STATE.sectionsVisited.clear();
+  STATE.missionsComplete.clear();
+  STATE.rp = 0;
+  await saveProgress();
+  updateHUD();
+  showToast('Progress reset');
+};
+window.resetAllData = async function() {
+  await dbClearAll();
+  STATE.sectionsVisited.clear();
+  STATE.missionsComplete.clear();
+  STATE.rp = 0;
+  STATE.prefs = { showHUD:true, showConst:true, parallax:true };
+  updateHUD();
+  applyPrefs();
+  showToast('All local data cleared');
+};
+
+// =============================================================================
+// HERO CANVAS — Animated particle network for the hero background
+// Lightweight: 60 particles, lines drawn when distance < 120px
+// =============================================================================
+let heroCanvas, heroCtx, particles = [];
+function initHeroCanvas() {
+  heroCanvas = document.getElementById('hero-canvas');
+  if (!heroCanvas) return;
+  heroCtx = heroCanvas.getContext('2d');
+  resizeHeroCanvas();
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x  : Math.random() * heroCanvas.width,
+      y  : Math.random() * heroCanvas.height,
+      vx : (Math.random() - 0.5) * 0.4,
+      vy : (Math.random() - 0.5) * 0.4,
+      r  : Math.random() * 1.8 + 0.5
+    });
+  }
+  animateHero();
+}
+function resizeHeroCanvas() {
+  if (!heroCanvas) return;
+  heroCanvas.width  = heroCanvas.offsetWidth;
+  heroCanvas.height = heroCanvas.offsetHeight;
+}
+function animateHero() {
+  if (!heroCtx) return;
+  const W = heroCanvas.width, H = heroCanvas.height;
+  heroCtx.clearRect(0, 0, W, H);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    heroCtx.beginPath();
+    heroCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    heroCtx.fillStyle = 'rgba(201,162,39,0.6)';
+    heroCtx.fill();
+  });
+  // Lines between nearby particles
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d  = Math.sqrt(dx * dx + dy * dy);
+      if (d < 120) {
+        heroCtx.beginPath();
+        heroCtx.moveTo(particles[i].x, particles[i].y);
+        heroCtx.lineTo(particles[j].x, particles[j].y);
+        heroCtx.strokeStyle = `rgba(74,163,107,${0.15 * (1 - d / 120)})`;
+        heroCtx.lineWidth   = 0.6;
+        heroCtx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animateHero);
+}
+
+// =============================================================================
+// TOAST — Lightweight notification system
+// =============================================================================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// =============================================================================
+// SCROLL HANDLER — Batches nav, parallax updates via requestAnimationFrame
+// =============================================================================
+let rafPending = false;
+window.addEventListener('scroll', () => {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => {
+    updateNav();
+    updateParallax();
+    rafPending = false;
+  });
+}, { passive: true });
+
+// =============================================================================
+// WINDOW RESIZE — Debounced; updates canvas sizes
+// =============================================================================
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    resizeSplashCanvas();
+    resizeHeroCanvas();
+  }, 200);
+});
+
+// =============================================================================
+// INITIALISE — Boot sequence after DOM is ready
+// Order: DB → load progress → prefs → splash → hero canvas → search index
+//        → reveal observer → section tracker → constellation
+// =============================================================================
+document.addEventListener('DOMContentLoaded', async () => {
+  await openDB();
+
+  // Preferences first (applies visibility before first paint)
+  await loadPrefsUI();
+
+  // Progress
+  await loadProgress();
+
+  // HUD collapsed state
+  const hc = await dbGet('hudCollapsed');
+  if (hc) {
+    STATE.hudCollapsed = true;
+    document.getElementById('hud').classList.add('collapsed');
+    document.getElementById('hud-toggle').textContent = '+';
+  }
+
+  // Splash: show briefly, dismiss after animation completes
+  initSplash();
+  const seenSplash = await dbGet('seenSplash');
+  const splashDelay = seenSplash ? 800 : 2200;
+  setTimeout(dismissSplash, splashDelay);
+
+  // Hero canvas
+  initHeroCanvas();
+
+  // Build search index after a short delay to not block paint
+  setTimeout(buildSearchIndex, 600);
+
+  // Observers
+  initReveal();
+  initSectionTracker();
+
+  // Initial constellation draw
+  drawConstellation();
+
+  // Initial parallax pass
+  updateParallax();
+});
+</script>
+</body>
+</html>
